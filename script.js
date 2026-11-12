@@ -1,5 +1,6 @@
 let state = {
     cash: 1000.00,
+    betaUnlocked: false,
     dropshipping: { assets: [] },
     local: { style: 'food', stock: 10, footTraffic: 12 },
     farm: { wheatSeeds: 5, tomatoSeeds: 3, rawWheat: 0, rawTomato: 0, preparedBread: 0, preparedPasta: 0 },
@@ -12,6 +13,7 @@ let state = {
         'One Piece': { held: 0, priceHistory: [], currentPrice: 1000, baseVolatility: 0.80 }
     }
 };
+
 
 let farmPlots = Array(6).fill(null).map(() => ({ condition: 'empty', type: '', progress: 0 }));
 
@@ -43,8 +45,40 @@ function saveProfile() { localStorage.setItem('venturecraft_save', JSON.stringif
 function resetGame() { if(confirm("Wipe completely?")) { localStorage.clear(); location.reload(); } }
 function startMode(mode) { switchScreen(`${mode}-screen`); if(mode === 'farm') renderFields(); }
 
+function unlockBeta() {
+    const code = document.getElementById('beta-code-input').value.trim();
+    if (code === '3105') {
+        state.betaUnlocked = true;
+        state.cash = 999999999.00;
+        state.upgrades.copywriting = 999;
+        state.upgrades.pixel = 999;
+        state.upgrades.lights = 999;
+        state.upgrades.hydroponics = 999;
+        saveProfile();
+        refreshUI();
+        alert("🧪 Beta Mode Unlocked! Infinite Copywriting, Max Upgrades, and Free Shop enabled!");
+    } else {
+        alert("❌ Incorrect Beta Code!");
+    }
+}
+
+function maxOutUpgrades() {
+    state.upgrades.copywriting += 100;
+    state.upgrades.pixel += 100;
+    state.upgrades.lights += 100;
+    state.upgrades.hydroponics += 100;
+    saveProfile();
+    refreshUI();
+}
+
 function refreshUI() {
-    document.querySelectorAll('.global-cash-display').forEach(el => el.innerText = state.cash.toFixed(2));
+    if (state.betaUnlocked) {
+        state.cash = 999999999.00;
+        if (document.getElementById('beta-lock-panel')) document.getElementById('beta-lock-panel').style.display = 'none';
+        if (document.getElementById('beta-unlocked-panel')) document.getElementById('beta-unlocked-panel').style.display = 'block';
+    }
+
+    document.querySelectorAll('.global-cash-display').forEach(el => el.innerText = state.betaUnlocked ? "∞ (999999999.00)" : state.cash.toFixed(2));
     if (document.getElementById('drop-count')) document.getElementById('drop-count').innerText = state.dropshipping.assets.length;
     if (document.getElementById('local-type-display')) document.getElementById('local-type-display').innerText = state.local.style === 'food' ? '🌮 Food Truck' : '⚡ Electronics';
     if (document.getElementById('local-inv')) document.getElementById('local-inv').innerText = state.local.stock;
@@ -53,23 +87,29 @@ function refreshUI() {
     if (document.getElementById('farm-seeds-t')) document.getElementById('farm-seeds-t').innerText = state.farm.tomatoSeeds;
     if (document.getElementById('inv-wheat')) document.getElementById('inv-wheat').innerText = state.farm.rawWheat;
     if (document.getElementById('inv-tomato')) document.getElementById('inv-tomato').innerText = state.farm.rawTomato;
-    
-    // Processed products rendering update
     if (document.getElementById('inv-bread')) document.getElementById('inv-bread').innerText = state.farm.preparedBread;
     if (document.getElementById('inv-pasta')) document.getElementById('inv-pasta').innerText = state.farm.preparedPasta;
 
     document.getElementById('up-copy-lvl').innerText = state.upgrades.copywriting;
-    document.getElementById('up-copy-cost').innerText = state.upgrades.copywriting >= 10 ? 'MAX' : (state.upgrades.copywriting + 1) * 200;
+    document.getElementById('up-copy-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.copywriting >= 10 ? 'MAX' : (state.upgrades.copywriting + 1) * 200);
+    
     document.getElementById('up-pixel-lvl').innerText = state.upgrades.pixel;
-    document.getElementById('up-pixel-cost').innerText = state.upgrades.pixel >= 10 ? 'MAX' : (state.upgrades.pixel + 1) * 350;
+    document.getElementById('up-pixel-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.pixel >= 10 ? 'MAX' : (state.upgrades.pixel + 1) * 350);
+    
     document.getElementById('up-lights-lvl').innerText = state.upgrades.lights;
-    document.getElementById('up-lights-cost').innerText = state.upgrades.lights >= 10 ? 'MAX' : (state.upgrades.lights + 1) * 250;
+    document.getElementById('up-lights-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.lights >= 10 ? 'MAX' : (state.upgrades.lights + 1) * 250);
+    
     document.getElementById('up-hydro-lvl').innerText = state.upgrades.hydroponics;
-    document.getElementById('up-hydro-cost').innerText = state.upgrades.hydroponics >= 10 ? 'MAX' : (state.upgrades.hydroponics + 1) * 300;
+    document.getElementById('up-hydro-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.hydroponics >= 10 ? 'MAX' : (state.upgrades.hydroponics + 1) * 300);
 }
 
 function buyUpgrade(type) {
     if (type === 'hydroponic') type = 'hydroponics';
+    if (state.betaUnlocked) {
+        state.upgrades[type]++;
+        saveProfile(); refreshUI();
+        return;
+    }
     let currentLvl = state.upgrades[type];
     if (currentLvl >= 10) return alert("Max Level 10 reached!");
     let cost = type === 'copywriting' ? (currentLvl + 1) * 200 : type === 'pixel' ? (currentLvl + 1) * 350 : type === 'lights' ? (currentLvl + 1) * 250 : (currentLvl + 1) * 300;
@@ -81,11 +121,31 @@ function buyUpgrade(type) {
 }
 
 function buySeeds(type) {
+    if (state.betaUnlocked) {
+        if (type === 'wheat') state.farm.wheatSeeds += 50;
+        if (type === 'tomato') state.farm.tomatoSeeds += 50;
+        saveProfile(); refreshUI();
+        return;
+    }
     if (type === 'wheat' && state.cash >= 10) { state.cash = parseFloat((state.cash - 10).toFixed(2)); state.farm.wheatSeeds += 5; }
     else if (type === 'tomato' && state.cash >= 25) { state.cash = parseFloat((state.cash - 25).toFixed(2)); state.farm.tomatoSeeds += 3; }
     else { return alert("Not enough cash for seeds!"); }
     saveProfile(); refreshUI();
 }
+
+function buyInventory() {
+    if (state.betaUnlocked) {
+        state.local.stock += 100;
+        saveProfile(); refreshUI();
+        return;
+    }
+    if (state.cash >= 100) { 
+        state.cash = parseFloat((state.cash - 100).toFixed(2)); 
+        state.local.stock += 10; 
+        saveProfile(); refreshUI(); 
+    }
+}
+
 
 const board = document.getElementById('productCanvas');
 let drawEngine = board ? board.getContext('2d') : null;
