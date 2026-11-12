@@ -199,6 +199,8 @@ setInterval(() => {
 }, 3800);
 
 function changeNiche() { state.local.style = document.getElementById('local-niche-select').value; saveProfile(); refreshUI(); }
+
+setInterval(() => {
     if (document.getElementById('local-screen').classList.contains('active') && state.local.stock > 0) {
         if (Math.random() * 100 < ((state.local.footTraffic + (state.upgrades.lights * 3)) * 3.5)) {
             state.local.stock--; const earn = state.local.style === 'food' ? 25.00 : 75.00;
