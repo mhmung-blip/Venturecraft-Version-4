@@ -14,7 +14,6 @@ let state = {
     }
 };
 
-
 let farmPlots = Array(6).fill(null).map(() => ({ condition: 'empty', type: '', progress: 0 }));
 
 if (localStorage.getItem('venturecraft_save')) {
@@ -23,40 +22,60 @@ if (localStorage.getItem('venturecraft_save')) {
         if (loadedState && typeof loadedState.cash === 'number') {
             state = { ...state, ...loadedState };
         }
-    } catch(e) { console.error("Save error."); }
+    } catch (e) { console.error("Save error."); }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     refreshUI();
     initStockMarketHTML();
     initStockMarketLoop();
+    resizeCanvas();
 });
 
-function switchScreen(id) {
+function openWelcomeModal() {
+    document.getElementById('welcome-modal').classList.add('active');
+}
+
+function closeWelcomeModal() {
+    document.getElementById('welcome-modal').classList.remove('active');
+    resizeCanvas();
+}
+
+function showTutorial(tabName, btnEl) {
+    document.querySelectorAll('.tut-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tut-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tut-${tabName}`).classList.add('active');
+    if (btnEl) btnEl.classList.add('active');
+}
+
+function switchScreen(id, btnEl) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    if (btnEl) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
     saveProfile();
     refreshUI();
     if (id === 'stock-screen') updateStockMarketVisuals();
+    if (id === 'dropshipping-screen') resizeCanvas();
 }
 
 function toggleTheme() { document.body.classList.toggle('light-theme'); }
 function saveProfile() { localStorage.setItem('venturecraft_save', JSON.stringify(state)); }
-function resetGame() { if(confirm("Wipe completely?")) { localStorage.clear(); location.reload(); } }
-function startMode(mode) { switchScreen(`${mode}-screen`); if(mode === 'farm') renderFields(); }
-
+function resetGame() { if (confirm("Wipe completely?")) { localStorage.clear(); location.reload(); } }
+function startMode(mode, btnEl) { switchScreen(`${mode}-screen`, btnEl); if (mode === 'farm') renderFields(); }
 function unlockBeta() {
     const code = document.getElementById('beta-code-input').value.trim();
     if (code === '3105') {
         state.betaUnlocked = true;
-        state.cash = 999999999.00;
-        state.upgrades.copywriting = 999;
-        state.upgrades.pixel = 999;
-        state.upgrades.lights = 999;
-        state.upgrades.hydroponics = 999;
+        state.upgrades.copywriting = Math.max(state.upgrades.copywriting, 999);
+        state.upgrades.pixel = Math.max(state.upgrades.pixel, 999);
+        state.upgrades.lights = Math.max(state.upgrades.lights, 999);
+        state.upgrades.hydroponics = Math.max(state.upgrades.hydroponics, 999);
         saveProfile();
         refreshUI();
-        alert("🧪 Beta Mode Unlocked! Infinite Copywriting, Max Upgrades, and Free Shop enabled!");
+        alert("🧪 Beta Mode Unlocked! Infinite Copywriting, Uncapped Free Upgrades, and Free Shop Supplies enabled!");
     } else {
         alert("❌ Incorrect Beta Code!");
     }
@@ -73,12 +92,11 @@ function maxOutUpgrades() {
 
 function refreshUI() {
     if (state.betaUnlocked) {
-        state.cash = 999999999.00;
         if (document.getElementById('beta-lock-panel')) document.getElementById('beta-lock-panel').style.display = 'none';
         if (document.getElementById('beta-unlocked-panel')) document.getElementById('beta-unlocked-panel').style.display = 'block';
     }
 
-    document.querySelectorAll('.global-cash-display').forEach(el => el.innerText = state.betaUnlocked ? "∞ (999999999.00)" : state.cash.toFixed(2));
+    document.querySelectorAll('.global-cash-display').forEach(el => el.innerText = state.cash.toFixed(2));
     if (document.getElementById('drop-count')) document.getElementById('drop-count').innerText = state.dropshipping.assets.length;
     if (document.getElementById('local-type-display')) document.getElementById('local-type-display').innerText = state.local.style === 'food' ? '🌮 Food Truck' : '⚡ Electronics';
     if (document.getElementById('local-inv')) document.getElementById('local-inv').innerText = state.local.stock;
@@ -91,23 +109,24 @@ function refreshUI() {
     if (document.getElementById('inv-pasta')) document.getElementById('inv-pasta').innerText = state.farm.preparedPasta;
 
     document.getElementById('up-copy-lvl').innerText = state.upgrades.copywriting;
-    document.getElementById('up-copy-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.copywriting >= 10 ? 'MAX' : (state.upgrades.copywriting + 1) * 200);
-    
+    document.getElementById('up-copy-cost').innerText = state.betaUnlocked ? '0 (FREE)' : (state.upgrades.copywriting >= 10 ? 'MAX' : (state.upgrades.copywriting + 1) * 200);
+
     document.getElementById('up-pixel-lvl').innerText = state.upgrades.pixel;
-    document.getElementById('up-pixel-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.pixel >= 10 ? 'MAX' : (state.upgrades.pixel + 1) * 350);
-    
+    document.getElementById('up-pixel-cost').innerText = state.betaUnlocked ? '0 (FREE)' : (state.upgrades.pixel >= 10 ? 'MAX' : (state.upgrades.pixel + 1) * 350);
+
     document.getElementById('up-lights-lvl').innerText = state.upgrades.lights;
-    document.getElementById('up-lights-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.lights >= 10 ? 'MAX' : (state.upgrades.lights + 1) * 250);
-    
+    document.getElementById('up-lights-cost').innerText = state.betaUnlocked ? '0 (FREE)' : (state.upgrades.lights >= 10 ? 'MAX' : (state.upgrades.lights + 1) * 250);
+
     document.getElementById('up-hydro-lvl').innerText = state.upgrades.hydroponics;
-    document.getElementById('up-hydro-cost').innerText = state.betaUnlocked ? 'FREE' : (state.upgrades.hydroponics >= 10 ? 'MAX' : (state.upgrades.hydroponics + 1) * 300);
+    document.getElementById('up-hydro-cost').innerText = state.betaUnlocked ? '0 (FREE)' : (state.upgrades.hydroponics >= 10 ? 'MAX' : (state.upgrades.hydroponics + 1) * 300);
 }
 
 function buyUpgrade(type) {
     if (type === 'hydroponic') type = 'hydroponics';
     if (state.betaUnlocked) {
         state.upgrades[type]++;
-        saveProfile(); refreshUI();
+        saveProfile();
+        refreshUI();
         return;
     }
     let currentLvl = state.upgrades[type];
@@ -116,7 +135,8 @@ function buyUpgrade(type) {
     if (state.cash >= cost) {
         state.cash = parseFloat((state.cash - cost).toFixed(2));
         state.upgrades[type]++;
-        saveProfile(); refreshUI();
+        saveProfile();
+        refreshUI();
     } else { alert("Not enough money!"); }
 }
 
@@ -124,75 +144,98 @@ function buySeeds(type) {
     if (state.betaUnlocked) {
         if (type === 'wheat') state.farm.wheatSeeds += 50;
         if (type === 'tomato') state.farm.tomatoSeeds += 50;
-        saveProfile(); refreshUI();
+        saveProfile();
+        refreshUI();
         return;
     }
     if (type === 'wheat' && state.cash >= 10) { state.cash = parseFloat((state.cash - 10).toFixed(2)); state.farm.wheatSeeds += 5; }
     else if (type === 'tomato' && state.cash >= 25) { state.cash = parseFloat((state.cash - 25).toFixed(2)); state.farm.tomatoSeeds += 3; }
     else { return alert("Not enough cash for seeds!"); }
-    saveProfile(); refreshUI();
+    saveProfile();
+    refreshUI();
 }
 
 function buyInventory() {
     if (state.betaUnlocked) {
         state.local.stock += 100;
-        saveProfile(); refreshUI();
+        saveProfile();
+        refreshUI();
         return;
     }
-    if (state.cash >= 100) { 
-        state.cash = parseFloat((state.cash - 100).toFixed(2)); 
-        state.local.stock += 10; 
-        saveProfile(); refreshUI(); 
-    }
+    if (state.cash >= 100) {
+        state.cash = parseFloat((state.cash - 100).toFixed(2));
+        state.local.stock += 10;
+        saveProfile();
+        refreshUI();
+    } else { alert("Not enough cash!"); }
 }
-
 
 const board = document.getElementById('productCanvas');
 let drawEngine = board ? board.getContext('2d') : null;
-let painting = false, lastDrawX = 0, lastDrawY = 0, currentPenColor = '#000000';
+let painting = false, lastDrawX = 0, lastDrawY = 0, currentPenColor = '#0f172a';
+
+function resizeCanvas() {
+    if (board && board.offsetWidth > 0) {
+        board.width = board.offsetWidth;
+        board.height = board.offsetHeight || 150;
+    }
+}
 
 if (board && drawEngine) {
-    board.width = board.offsetWidth || 340; board.height = board.offsetHeight || 150;
-    board.addEventListener('mousedown', (e) => { 
-        painting = true; const d = board.getBoundingClientRect();
+    board.addEventListener('mousedown', (e) => {
+        painting = true;
+        const d = board.getBoundingClientRect();
         lastDrawX = (e.clientX - d.left) * (board.width / d.width);
         lastDrawY = (e.clientY - d.top) * (board.height / d.height);
     });
     board.addEventListener('mouseup', () => painting = false);
+    board.addEventListener('mouseleave', () => painting = false);
     board.addEventListener('mousemove', (e) => {
         if (!painting || !drawEngine) return;
-        drawEngine.lineWidth = 4; drawEngine.lineCap = 'round'; drawEngine.lineJoin = 'round'; drawEngine.strokeStyle = currentPenColor;
+        drawEngine.lineWidth = 4;
+        drawEngine.lineCap = 'round';
+        drawEngine.lineJoin = 'round';
+        drawEngine.strokeStyle = currentPenColor;
         const d = board.getBoundingClientRect();
         const cx = (e.clientX - d.left) * (board.width / d.width);
         const cy = (e.clientY - d.top) * (board.height / d.height);
-        drawEngine.beginPath(); drawEngine.moveTo(lastDrawX, lastDrawY); drawEngine.lineTo(cx, cy); drawEngine.stroke();
-        lastDrawX = cx; lastDrawY = cy;
+        drawEngine.beginPath();
+        drawEngine.moveTo(lastDrawX, lastDrawY);
+        drawEngine.lineTo(cx, cy);
+        drawEngine.stroke();
+        lastDrawX = cx;
+        lastDrawY = cy;
     });
 }
-function setCanvasColor(hex) { currentPenColor = hex; }
-function clearCanvas() { if(drawEngine) drawEngine.clearRect(0, 0, board.width, board.height); }
-
+function clearCanvas() { if (drawEngine) drawEngine.clearRect(0, 0, board.width, board.height); }
 function saveProduct() {
     const tBox = document.getElementById('drop-name'), cBox = document.getElementById('drop-price'), dBox = document.getElementById('drop-desc');
-    if(!tBox.value || !cBox.value || !dBox.value) return alert("Fill fields!");
+    if (!tBox.value || !cBox.value || !dBox.value) return alert("Fill fields!");
     const price = parseFloat(cBox.value), pitch = dBox.value.toLowerCase();
     let score = 25;
-    if (pitch.length > 25) score += 20; if (pitch.length > 70) score += 20;
+    if (pitch.length > 25) score += 20;
+    if (pitch.length > 70) score += 20;
     if (pitch.includes("premium") || pitch.includes("luxury")) score += 15;
     score += (state.upgrades.copywriting * 15);
     let conv = score - (price / (3.0 + (state.upgrades.pixel)));
     if (conv < 6) conv = 6;
     state.dropshipping.assets.push({ title: tBox.value, cost: price, conversionChance: Math.min(conv, 95) });
     document.getElementById('drop-feed').innerHTML = `<div>[SYS] "${tBox.value}" launched (${Math.round(conv)}% chance)</div>` + document.getElementById('drop-feed').innerHTML;
-    tBox.value = ''; cBox.value = ''; dBox.value = ''; clearCanvas(); saveProfile(); refreshUI();
+    tBox.value = '';
+    cBox.value = '';
+    dBox.value = '';
+    clearCanvas();
+    saveProfile();
+    refreshUI();
 }
 
 setInterval(() => {
-    if(state.dropshipping.assets.length > 0 && document.getElementById('dropshipping-screen').classList.contains('active')) {
+    if (state.dropshipping.assets.length > 0 && document.getElementById('dropshipping-screen').classList.contains('active')) {
         const item = state.dropshipping.assets[Math.floor(Math.random() * state.dropshipping.assets.length)];
-        if(Math.random() * 100 < item.conversionChance) {
-            const net = parseFloat((item.cost * 0.6).toFixed(2)); state.cash = parseFloat((state.cash + net).toFixed(2));
-            document.getElementById('drop-feed').innerHTML = `<div style="color:#4caf50;">✔ Bought 1x "${item.title}" (+$${net})</div>` + document.getElementById('drop-feed').innerHTML;
+        if (Math.random() * 100 < item.conversionChance) {
+            const net = parseFloat((item.cost * 0.6).toFixed(2));
+            state.cash = parseFloat((state.cash + net).toFixed(2));
+            document.getElementById('drop-feed').innerHTML = `<div style="color:#10b981;">✔ Bought 1x "${item.title}" (+$${net})</div>` + document.getElementById('drop-feed').innerHTML;
         }
         refreshUI();
     }
@@ -203,36 +246,41 @@ function changeNiche() { state.local.style = document.getElementById('local-nich
 setInterval(() => {
     if (document.getElementById('local-screen').classList.contains('active') && state.local.stock > 0) {
         if (Math.random() * 100 < ((state.local.footTraffic + (state.upgrades.lights * 3)) * 3.5)) {
-            state.local.stock--; const earn = state.local.style === 'food' ? 25.00 : 75.00;
+            state.local.stock--;
+            const earn = state.local.style === 'food' ? 25.00 : 75.00;
             state.cash = parseFloat((state.cash + earn).toFixed(2));
-            document.getElementById('local-feed').innerHTML = `<div style="color:#4caf50;">✔ Product Sold (+$${earn})</div>` + document.getElementById('local-feed').innerHTML;
+            document.getElementById('local-feed').innerHTML = `<div style="color:#10b981;">✔ Product Sold (+$${earn})</div>` + document.getElementById('local-feed').innerHTML;
             refreshUI();
         }
     }
 }, 3000);
 
 function renderFields() {
-    const grid = document.getElementById('farmPlotsContainer'); if (!grid) return; grid.innerHTML = '';
+    const grid = document.getElementById('farmPlotsContainer');
+    if (!grid) return;
+    grid.innerHTML = '';
     farmPlots.forEach((plot, idx) => {
-        const card = document.createElement('div'); card.className = `plot-card ${plot.condition}`;
+        const card = document.createElement('div');
+        card.className = `plot-card ${plot.condition}`;
         if (plot.condition === 'empty') {
             card.innerHTML = `<h4>Plot ${idx + 1}</h4>
-                <button class="btn" style="min-width:auto; padding:4px 8px; font-size:0.75rem;" onclick="plantCrop(${idx}, 'wheat')">Wheat</button>
-                <button class="btn" style="min-width:auto; padding:4px 8px; font-size:0.75rem; background:#ff9800;" onclick="plantCrop(${idx}, 'tomato')">Tomato</button>`;
+                <button class="btn btn-primary btn-sm" onclick="plantCrop(${idx}, 'wheat')">🌾 Wheat</button>
+                <button class="btn btn-warning btn-sm" onclick="plantCrop(${idx}, 'tomato')">🍅 Tomato</button>`;
         } else if (plot.condition === 'growing') {
-            card.innerHTML = `<h4>Plot ${idx+1}</h4><p style="color:#2196f3; font-size:0.85rem;">Growing (${plot.progress}%)</p>`;
+            card.innerHTML = `<h4>Plot ${idx + 1}</h4><p style="color:#60a5fa; font-size:0.85rem;">Growing (${plot.progress}%)</p>`;
         } else if (plot.condition === 'ready') {
-            card.innerHTML = `<h4>Plot ${idx+1}</h4><button class="btn" style="min-width:auto; padding:5px 12px; background:#ff9800;" onclick="harvestCrop(${idx})">Harvest</button>`;
+            card.innerHTML = `<h4>Plot ${idx + 1}</h4><button class="btn btn-success btn-sm" onclick="harvestCrop(${idx})">✨ Harvest</button>`;
         }
         grid.appendChild(card);
     });
 }
 
-window.plantCrop = function(idx, type) {
+window.plantCrop = function (idx, type) {
     if (type === 'wheat' && state.farm.wheatSeeds > 0) { state.farm.wheatSeeds--; farmPlots[idx] = { condition: 'growing', type: 'wheat', progress: 0 }; }
     else if (type === 'tomato' && state.farm.tomatoSeeds > 0) { state.farm.tomatoSeeds--; farmPlots[idx] = { condition: 'growing', type: 'tomato', progress: 0 }; }
     else { return alert("No seeds!"); }
-    renderFields(); refreshUI();
+    renderFields();
+    refreshUI();
     let speed = 1 + (state.upgrades.hydroponics * 0.25);
     let interval = setInterval(() => {
         if (farmPlots[idx] && farmPlots[idx].condition === 'growing') {
@@ -242,54 +290,47 @@ window.plantCrop = function(idx, type) {
         } else { clearInterval(interval); }
     }, 800);
 };
-
-window.harvestCrop = function(idx) {
-    if (farmPlots[idx].type === 'wheat') state.farm.rawWheat += 2; else state.farm.rawTomato += 2;
+window.harvestCrop = function (idx) {
+    if (farmPlots[idx].type === 'wheat') state.farm.rawWheat += 2;
+    else state.farm.rawTomato += 2;
     farmPlots[idx] = { condition: 'empty', type: '', progress: 0 };
-    saveProfile(); renderFields(); refreshUI();
+    saveProfile();
+    renderFields();
+    refreshUI();
 };
 
-// Processing Kitchen Logic
-window.processFood = function(type) {
+window.processFood = function (type) {
     if (type === 'bread') {
         if (state.farm.rawWheat >= 3) {
             state.farm.rawWheat -= 3;
             state.farm.preparedBread += 1;
             logFarmMessage("🍞 Baked 1x Fresh Bread!", "#38bdf8");
-        } else {
-            alert("Not enough Raw Wheat! You need 3 units.");
-        }
+        } else { alert("Not enough Raw Wheat! You need 3 units."); }
     } else if (type === 'pasta') {
         if (state.farm.rawWheat >= 2 && state.farm.rawTomato >= 2) {
             state.farm.rawWheat -= 2;
             state.farm.rawTomato -= 2;
             state.farm.preparedPasta += 1;
             logFarmMessage("🍝 Cooked 1x Tomato Pasta!", "#38bdf8");
-        } else {
-            alert("Not enough ingredients! You need 2 Wheat and 2 Tomatoes.");
-        }
+        } else { alert("Not enough ingredients! You need 2 Wheat and 2 Tomatoes."); }
     }
     saveProfile();
     refreshUI();
 };
 
-window.sellFood = function(type) {
+window.sellFood = function (type) {
     if (type === 'bread') {
         if (state.farm.preparedBread > 0) {
             state.farm.preparedBread -= 1;
             state.cash = parseFloat((state.cash + 45.00).toFixed(2));
-            logFarmMessage("💰 Sold 1x Fresh Bread for $45.00!", "#4caf50");
-        } else {
-            alert("You don't have any Bread to sell!");
-        }
+            logFarmMessage("💰 Sold 1x Fresh Bread for $45.00!", "#10b981");
+        } else { alert("You don't have any Bread to sell!"); }
     } else if (type === 'pasta') {
         if (state.farm.preparedPasta > 0) {
             state.farm.preparedPasta -= 1;
             state.cash = parseFloat((state.cash + 90.00).toFixed(2));
-            logFarmMessage("💰 Sold 1x Tomato Pasta for $90.00!", "#4caf50");
-        } else {
-            alert("You don't have any Pasta to sell!");
-        }
+            logFarmMessage("💰 Sold 1x Tomato Pasta for $90.00!", "#10b981");
+        } else { alert("You don't have any Pasta to sell!"); }
     }
     saveProfile();
     refreshUI();
@@ -297,27 +338,30 @@ window.sellFood = function(type) {
 
 function logFarmMessage(msg, color = "#fff") {
     const feed = document.getElementById('farm-feed');
-    if (feed) {
-        feed.innerHTML = `<div style="color:${color};">[KITCHEN] ${msg}</div>` + feed.innerHTML;
-    }
+    if (feed) { feed.innerHTML = `<div style="color:${color};">[KITCHEN] ${msg}</div>` + feed.innerHTML; }
 }
 
 function initStockMarketHTML() {
-    const container = document.getElementById('stock-grid-container'); if (!container) return; container.innerHTML = '';
+    const container = document.getElementById('stock-grid-container');
+    if (!container) return;
+    container.innerHTML = '';
     for (let name in state.stocks) {
         let id = name.replace(' ', '-');
-        let card = document.createElement('div'); card.className = 'upgrade-item'; card.id = `stock-card-${id}`; card.style.marginBottom = '15px';
+        let card = document.createElement('div');
+        card.className = 'panel';
+        card.id = `stock-card-${id}`;
+        card.style.marginBottom = '0';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <div><h3 style="margin:0;" id="stock-name-${id}">${name}</h3><small id="stock-held-${id}">Owned: 0</small></div>
+                <div><h3 style="margin:0; border:none; padding:0;" id="stock-name-${id}">${name}</h3><small id="stock-held-${id}">Owned: 0</small></div>
                 <div style="text-align:right;"><div style="font-size:1.3rem; font-weight:bold;" id="stock-price-${id}">$0</div><small id="stock-trend-${id}">📈 WANTED</small></div>
             </div>
             <div style="height:40px; background:rgba(0,0,0,0.2); border-radius:4px; margin-bottom:10px;">
                 <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width:100%; height:100%;"><polyline fill="none" id="stock-polyline-${id}" stroke="#10b981" stroke-width="2" points="0,20 100,20"/></svg>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><input type="number" id="amt-buy-${id}" placeholder="Amount ($)" style="margin-bottom:5px; padding:5px; width:80%;"><button class="btn" style="min-width:100%; margin:0; padding:6px; font-size:0.85rem;" onclick="tradeAsset('${name}', 'buy')">Buy</button></div>
-                <div><input type="number" id="amt-sell-${id}" placeholder="Units" style="margin-bottom:5px; padding:5px; width:80%;"><button class="btn" style="min-width:100%; margin:0; padding:6px; font-size:0.85rem; background:#ef4444;" onclick="tradeAsset('${name}', 'sell')">Sell</button></div>
+                <div><input type="number" id="amt-buy-${id}" placeholder="Amount ($)" style="margin-bottom:5px; padding:6px;"><button class="btn btn-success btn-sm" onclick="tradeAsset('${name}', 'buy')">Buy</button></div>
+                <div><input type="number" id="amt-sell-${id}" placeholder="Units" style="margin-bottom:5px; padding:6px;"><button class="btn btn-sm" style="background:var(--danger-color);" onclick="tradeAsset('${name}', 'sell')">Sell</button></div>
             </div>`;
         container.appendChild(card);
     }
@@ -327,16 +371,19 @@ function initStockMarketLoop() {
     setInterval(() => {
         let alerts = [];
         for (let name in state.stocks) {
-            let asset = state.stocks[name]; let change = (Math.random() - 0.48) * 2 * asset.baseVolatility;
+            let asset = state.stocks[name];
+            let change = (Math.random() - 0.48) * 2 * asset.baseVolatility;
             if (name === 'One Piece') { if (Math.random() < 0.01) change = 8.0; else change = (Math.random() - 0.65) * asset.baseVolatility; }
-            asset.currentPrice = Math.max(0.50, asset.currentPrice * (1 + change)); asset.priceHistory.push(asset.currentPrice);
+            asset.currentPrice = Math.max(0.50, asset.currentPrice * (1 + change));
+            asset.priceHistory.push(asset.currentPrice);
             if (asset.priceHistory.length > 15) asset.priceHistory.shift();
             if (change > 0.15 && asset.held > 0) alerts.push(`🔥 "${name}" is highly WANTED! Sell now!`);
         }
         const displayAlert = document.getElementById('market-notification');
         if (displayAlert) {
-            if(alerts.length > 0 && document.getElementById('stock-screen').classList.contains('active')) {
-                displayAlert.innerText = alerts.join(" | "); displayAlert.style.display = 'block';
+            if (alerts.length > 0 && document.getElementById('stock-screen').classList.contains('active')) {
+                displayAlert.innerText = alerts.join(" | ");
+                displayAlert.style.display = 'block';
             } else { displayAlert.style.display = 'none'; }
         }
         if (document.getElementById('stock-screen').classList.contains('active')) updateStockMarketVisuals();
@@ -354,23 +401,29 @@ function updateStockMarketVisuals() {
         if (document.getElementById(`stock-trend-${id}`)) { document.getElementById(`stock-trend-${id}`).innerText = trend ? '📈 WANTED' : '📉 UNWANTED'; document.getElementById(`stock-trend-${id}`).style.color = color; }
         if (document.getElementById(`stock-polyline-${id}`)) {
             let min = Math.min(...hist), max = Math.max(...hist), r = max - min === 0 ? 1 : max - min;
-            let pts = hist.map((v, i) => `${(i / (hist.length - 1)) * 100},${40 - (((v - min) / r) * 32 + 4)}`).join(' ');
-            document.getElementById(`stock-polyline-${id}`).setAttribute('points', pts); document.getElementById(`stock-polyline-${id}`).setAttribute('stroke', color);
+            let pts = hist.map((v, i) => `${(i / Math.max(1, hist.length - 1)) * 100},${40 - (((v - min) / r) * 32 + 4)}`).join(' ');
+            document.getElementById(`stock-polyline-${id}`).setAttribute('points', pts);
+            document.getElementById(`stock-polyline-${id}`).setAttribute('stroke', color);
         }
     }
 }
 
-window.tradeAsset = function(name, action) {
+window.tradeAsset = function (name, action) {
     let asset = state.stocks[name], id = name.replace(' ', '-');
     if (action === 'buy') {
         let val = parseFloat(document.getElementById(`amt-buy-${id}`).value);
         if (isNaN(val) || val <= 0 || state.cash < val) return alert("Invalid entry or funds!");
-        state.cash = parseFloat((state.cash - val).toFixed(2)); asset.held += (val / asset.currentPrice);
+        state.cash = parseFloat((state.cash - val).toFixed(2));
+        asset.held += (val / asset.currentPrice);
     } else {
         let units = parseFloat(document.getElementById(`amt-sell-${id}`).value);
         if (isNaN(units) || units <= 0 || asset.held < units) return alert("Invalid units!");
-        state.cash = parseFloat((state.cash + (units * asset.currentPrice)).toFixed(2)); asset.held -= units;
+        state.cash = parseFloat((state.cash + (units * asset.currentPrice)).toFixed(2));
+        asset.held -= units;
     }
-    document.getElementById(`amt-buy-${id}`).value = ''; document.getElementById(`amt-sell-${id}`).value = '';
-    saveProfile(); refreshUI(); updateStockMarketVisuals();
+    document.getElementById(`amt-buy-${id}`).value = '';
+    document.getElementById(`amt-sell-${id}`).value = '';
+    saveProfile();
+    refreshUI();
+    updateStockMarketVisuals();
 };
