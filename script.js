@@ -52,7 +52,7 @@ function createCoopLobby() {
 
     peer.on('open', () => {
         setCoopUIActive(true);
-        logLocalMessage(`👑 Created Online Lobby [${coopRoom}]! Tell your friends to enter "${coopRoom}" and click Join Lobby.`, '#34d399');
+        logLocalMessage(`👑 Created Online Lobby [${coopRoom}]! Tell friends to enter "${coopRoom}" and click Join Lobby.`, '#34d399');
         unlockAchievement('coop_join');
     });
 
