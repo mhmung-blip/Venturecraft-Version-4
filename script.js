@@ -35,6 +35,103 @@ let peer = null;
 let connections = [];
 let isHost = false;
 
+const SHOP_CATALOGS = {
+    food: { label: '🌮 Food Truck', items: ['Street Taco', 'Loaded Nachos', 'Churro Pack', 'Burrito Bowl'], min: 18, max: 32 },
+    coffee: { label: '☕ Cozy Coffeehouse', items: ['Iced Latte', 'Caramel Macchiato', 'Croissant', 'Matcha Tea'], min: 8, max: 16 },
+    electronics: { label: '⚡ Electronics Boutique', items: ['Wireless Earbuds', 'Smart Watch', 'Mechanical Keyboard', 'LED Monitor'], min: 65, max: 140 },
+    sneakers: { label: '👟 Luxury Sneaker Vault', items: ['Air Retro Highs', 'Limited Runner', 'Designer Slides', 'Collector Box'], min: 180, max: 350 }
+};
+
+const ACHIEVEMENTS_LIST = [
+    { id: 'first_scan', tier: 'easy', name: 'Beep! First Sale', desc: 'Scan your very first item at the storefront register.' },
+    { id: 'rename_shop', tier: 'easy', name: 'Grand Reopening', desc: 'Give your storefront a custom business name.' },
+    { id: 'first_harvest', tier: 'easy', name: 'Green Thumb', desc: 'Harvest your first crop from the farm.' },
+    { id: 'first_campaign', tier: 'easy', name: 'Digital Marketer', desc: 'Launch your first dropshipping product.' },
+    { id: 'serve_25', tier: 'medium', name: 'Local Favorite', desc: 'Serve 25 customers at your storefront.' },
+    { id: 'cook_feast', tier: 'medium', name: 'Master Chef', desc: 'Craft a Supreme Feast in the farm kitchen.' },
+    { id: 'auto_scanner', tier: 'medium', name: 'Automation Age', desc: 'Unlock the Storefront Auto-Scanner.' },
+    { id: 'coop_join', tier: 'medium', name: 'Business Partners', desc: 'Join or create a Storefront Co-Op Lobby.' },
+    { id: 'cash_10k', tier: 'hard', name: 'Five-Figure Founder', desc: 'Hold $10,000.00 in liquid cash.' },
+    { id: 'serve_100', tier: 'hard', name: 'Retail Tycoon', desc: 'Serve 100 customers at your storefront.' },
+    { id: 'hq_max', tier: 'hard', name: 'Maxed Headquarters', desc: 'Reach Level 10+ on any HQ Upgrade.' },
+    { id: 'cash_100k', tier: 'impossible', name: 'Six-Figure Empire', desc: 'Accumulate $100,000.00 in liquid cash.' },
+    { id: 'cash_1m', tier: 'impossible', name: 'Venture Mogul', desc: 'Reach $1,000,000.00 in liquid cash.' },
+    { id: 'one_piece_holder', tier: 'impossible', name: 'King of the Pirates', desc: 'Own at least 5 units of One Piece stock.' }
+];
+
+if (localStorage.getItem('venturecraft_save')) {
+    try {
+        const loaded = JSON.parse(localStorage.getItem('venturecraft_save'));
+        if (loaded && typeof loaded.cash === 'number') {
+            state = {
+                ...state,
+                ...loaded,
+                local: { ...state.local, ...(loaded.local || {}) },
+                farm: { ...state.farm, ...(loaded.farm || {}) },
+                upgrades: { ...state.upgrades, ...(loaded.upgrades || {}) },
+                achievements: { ...(loaded.achievements || {}) }
+            };
+        }
+    } catch (e) { console.error("Save error."); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const nicheSel = document.getElementById('local-niche-select');
+    if (nicheSel) nicheSel.value = state.local.style;
+    renderAchievements();
+    refreshUI();
+    initStockMarketHTML();
+    initStockMarketLoop();
+    resizeCanvas();
+});
+
+function playScannerBeep(isCheckout = false) {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isCheckout ? 1560 : 1200, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isCheckout ? 0.18 : 0.09));
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + (isCheckout ? 0.18 : 0.09));
+    } catch (e) {}
+}
+
+function openWelcomeModal() { document.getElementById('welcome-modal').classList.add('active'); }
+function closeWelcomeModal() { document.getElementById('welcome-modal').classList.remove('active'); resizeCanvas(); }
+
+function showTutorial(tabName, btnEl) {
+    document.querySelectorAll('.tut-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tut-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tut-${tabName}`).classList.add('active');
+    if (btnEl) btnEl.classList.add('active');
+}
+
+function switchScreen(id, btnEl) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (btnEl) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
+    saveProfile();
+    refreshUI();
+    if (id === 'stock-screen') updateStockMarketVisuals();
+    if (id === 'dropshipping-screen') resizeCanvas();
+    if (id === 'achievements-screen') renderAchievements();
+}
+
+function toggleTheme() { document.body.classList.toggle('light-theme'); }
+function saveProfile() { localStorage.setItem('venturecraft_save', JSON.stringify(state)); }
+function resetGame() { if (confirm("Wipe completely?")) { localStorage.clear(); location.reload(); } }
+function startMode(mode, btnEl) { switchScreen(`${mode}-screen`, btnEl); if (mode === 'farm') renderFields(); }
+
 function createCoopLobby() {
     const nameInput = document.getElementById('coop-player-name').value.trim();
     const roomInput = document.getElementById('coop-room-input').value.trim().toUpperCase();
