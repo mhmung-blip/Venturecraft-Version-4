@@ -180,11 +180,13 @@
                         <div id="coop-status-box" class="coop-offline">Offline (Solo Mode)</div>
                     </div>
 
-                    <div id="coop-join-controls" class="coop-controls">
+                    <div id="coop-join-controls" class="coop-controls" style="grid-template-columns: 1fr 1fr auto auto;">
                         <input type="text" id="coop-player-name" placeholder="Your Name (e.g. Alex)" maxlength="14">
                         <input type="text" id="coop-room-input" placeholder="Room Code (e.g. SHOP)" maxlength="8" style="text-transform:uppercase;">
-                        <button class="btn btn-primary" onclick="joinCoopLobby()">Join / Create Lobby</button>
+                        <button class="btn btn-success" onclick="createCoopLobby()">Create Lobby</button>
+                        <button class="btn btn-primary" onclick="joinCoopLobby()">Join Lobby</button>
                     </div>
+
 
                     <div id="coop-active-controls" class="coop-active-bar" style="display:none;">
                         <div>
@@ -448,6 +450,7 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com"></script>
     <script src="script.js"></script>
 </body>
 </html>
