@@ -10,49 +10,49 @@
 </head>
 <body>
 
+    <div id="achievement-toast-container" class="toast-container"></div>
+
     <!-- STARTUP MENU & TUTORIAL MODAL -->
     <div id="welcome-modal" class="modal-overlay active">
         <div class="modal-box">
             <div class="modal-header">
-                <span class="badge-pill">VERSION 2.0</span>
+                <span class="badge-pill">VERSION 3.0 • CO-OP & POS UPDATE</span>
                 <h1>Welcome to Venturecraft 🚀</h1>
-                <p>Build your empire from scratch across e-commerce, retail, agriculture, and high-frequency trading.</p>
+                <p>Run an interactive storefront with friends, automate farms, launch e-commerce brands, and unlock 14 achievements.</p>
             </div>
 
             <div class="tutorial-tabs">
                 <button class="tut-tab active" onclick="showTutorial('overview', this)">🎯 Goal</button>
-                <button class="tut-tab" onclick="showTutorial('dropship', this)">📦 Dropshipping</button>
-                <button class="tut-tab" onclick="showTutorial('local', this)">🏪 Storefront</button>
+                <button class="tut-tab" onclick="showTutorial('local', this)">🏪 POS & Co-Op</button>
                 <button class="tut-tab" onclick="showTutorial('farm', this)">🌾 Farm & Kitchen</button>
+                <button class="tut-tab" onclick="showTutorial('dropship', this)">📦 Dropshipping</button>
                 <button class="tut-tab" onclick="showTutorial('stocks', this)">📈 Stocks</button>
             </div>
 
             <div class="tutorial-content">
                 <div id="tut-overview" class="tut-pane active">
                     <h3>Your Path to Millions</h3>
-                    <p>Start with <strong>$1,000.00</strong> and invest across 4 distinct industries. Reinvest your profits into <strong>HQ Upgrades</strong> on your Dashboard to multiply your conversion rates, foot traffic, and crop growth speed.</p>
+                    <p>Start with <strong>$1,000.00</strong> and grow across 4 industries. Complete <strong>14 Achievements</strong> ranging from Easy to Impossible, and invest in HQ Upgrades to multiply your profits.</p>
+                </div>
+                <div id="tut-local" class="tut-pane">
+                    <h3>🏪 Interactive Storefront & Co-Op Lobby</h3>
+                    <p>1. Rename your shop and pick from 4 niches (Food Truck, Coffeehouse, Electronics, or Sneaker Vault).<br>
+                       2. Wait for customers to step up to the register, then click <strong>Beep & Scan</strong> (or buy the <strong>Auto-Scanner</strong>) to ring up their items.<br>
+                       3. Join a <strong>Lobby Room Code</strong> to run the same shop live with friends across tabs!</p>
+                </div>
+                <div id="tut-farm" class="tut-pane">
+                    <h3>🌾 Expanded Farm & Kitchen</h3>
+                    <p>1. Plant <strong>Wheat</strong>, <strong>Tomatoes</strong>, or <strong>Golden Corn</strong>.<br>
+                       2. Buy Farm Upgrades like <strong>Tractor Yield</strong> and <strong>Roadside Stand</strong>.<br>
+                       3. Cook 4 artisan dishes in the Kitchen including the <strong>$160 Supreme Feast</strong>!</p>
                 </div>
                 <div id="tut-dropship" class="tut-pane">
                     <h3>📦 E-Commerce & Dropshipping</h3>
-                    <p>1. Enter a catchy <strong>Product Name</strong> and set a <strong>Retail Price</strong>.<br>
-                       2. Write persuasive ad copy (words like <em>"premium"</em> or <em>"luxury"</em> boost sales!).<br>
-                       3. Sketch a product mockup on the canvas and click <strong>Launch Campaign</strong> to earn passive sales.</p>
-                </div>
-                <div id="tut-local" class="tut-pane">
-                    <h3>🏪 Local Storefront</h3>
-                    <p>1. Choose between a fast-selling <strong>Food Truck</strong> ($25/sale) or high-margin <strong>Electronics Boutique</strong> ($75/sale).<br>
-                       2. Keep your shelves stocked by clicking <strong>Restock Bulk Inventory</strong>.<br>
-                       3. Upgrade <strong>Neon Lights</strong> in HQ to attract more hourly visitors.</p>
-                </div>
-                <div id="tut-farm" class="tut-pane">
-                    <h3>🌾 Automated Farm & Kitchen</h3>
-                    <p>1. Buy <strong>Wheat</strong> or <strong>Tomato Seeds</strong> and plant them in your 6 arable fields.<br>
-                       2. Once crops reach 100%, harvest them into your silo.<br>
-                       3. Use the <strong>Kitchen</strong> to bake Bread ($45) or cook Pasta ($90) for massive markups!</p>
+                    <p>Design products, write persuasive ad copy (use words like <em>"premium"</em> or <em>"luxury"</em>), sketch a mockup, and earn passive sales.</p>
                 </div>
                 <div id="tut-stocks" class="tut-pane">
                     <h3>📈 High-Frequency Stock Market</h3>
-                    <p>Watch live price charts update every 6 seconds. Buy low when assets are <strong>UNWANTED</strong>, and sell high when market alerts flash <strong>WANTED</strong>!</p>
+                    <p>Buy low when assets are <strong>UNWANTED</strong>, and sell high when alerts flash <strong>WANTED</strong>!</p>
                 </div>
             </div>
 
@@ -67,6 +67,7 @@
         <div class="brand">
             <span class="logo-icon">🚀</span>
             <h2>Venturecraft</h2>
+            <span id="coop-top-badge" class="coop-pill" style="display:none;">🟢 LOBBY: <strong id="coop-top-code">----</strong></span>
         </div>
         <div class="top-stats">
             <div class="cash-pill">
@@ -79,16 +80,16 @@
     </header>
 
     <div class="main-container">
-        <!-- SIDEBAR NAVIGATION -->
         <aside class="sidebar">
             <div class="nav-group-label">OPERATIONS</div>
             <button class="nav-btn active" onclick="switchScreen('dashboard-screen', this)">📊 Dashboard</button>
+            <button class="nav-btn" onclick="switchScreen('local-screen', this)">🏪 Storefront & Co-Op</button>
+            <button class="nav-btn" onclick="startMode('farm', this)">🌾 Farm & Kitchen</button>
             <button class="nav-btn" onclick="switchScreen('dropshipping-screen', this)">📦 Dropshipping</button>
-            <button class="nav-btn" onclick="switchScreen('local-screen', this)">🏪 Local Storefront</button>
-            <button class="nav-btn" onclick="startMode('farm', this)">🌾 Automated Farm</button>
             <button class="nav-btn" onclick="switchScreen('stock-screen', this)">📈 Stock Market</button>
             
-            <div class="nav-group-label" style="margin-top:20px;">SYSTEM</div>
+            <div class="nav-group-label" style="margin-top:18px;">PROGRESS & SYSTEM</div>
+            <button class="nav-btn nav-gold" onclick="switchScreen('achievements-screen', this)">🏆 Achievements (<span id="nav-ach-count">0</span>/14)</button>
             <button class="nav-btn nav-beta" onclick="switchScreen('beta-screen', this)">🧪 Beta Test</button>
             <button class="nav-btn nav-danger" onclick="resetGame()">🚨 Reset Save</button>
         </aside>
@@ -109,12 +110,12 @@
                         <span class="stat-value text-green">$<span class="global-cash-display">1000.00</span></span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-title">Active Campaigns</span>
-                        <span class="stat-value" id="drop-count">0</span>
+                        <span class="stat-title">Storefront Name</span>
+                        <span class="stat-value" id="dash-shop-name">Venture Mart</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-title">Storefront Niche</span>
-                        <span class="stat-value" id="local-type-display">🌮 Food Truck</span>
+                        <span class="stat-title">Achievements</span>
+                        <span class="stat-value text-gold"><span id="dash-ach-count">0</span> / 14</span>
                     </div>
                 </div>
 
@@ -133,7 +134,7 @@
                         <div class="upgrade-card">
                             <div class="upgrade-info">
                                 <h4>🎯 Tracking Pixel</h4>
-                                <p>Allows selling high-ticket products without losing buyers.</p>
+                                <p>Reduces price penalty on expensive dropship items.</p>
                                 <span class="lvl-badge">Level <span id="up-pixel-lvl">0</span></span>
                             </div>
                             <button class="btn btn-primary" onclick="buyUpgrade('pixel')">Upgrade ($<span id="up-pixel-cost">350</span>)</button>
@@ -142,7 +143,7 @@
                         <div class="upgrade-card">
                             <div class="upgrade-info">
                                 <h4>💡 Neon Storefront Lights</h4>
-                                <p>Attracts +3 hourly visitors to your local shop.</p>
+                                <p>Attracts customers faster to your storefront register.</p>
                                 <span class="lvl-badge">Level <span id="up-lights-lvl">0</span></span>
                             </div>
                             <button class="btn btn-primary" onclick="buyUpgrade('lights')">Upgrade ($<span id="up-lights-cost">250</span>)</button>
@@ -160,6 +161,203 @@
                 </div>
             </section>
 
+            <!-- LOCAL STOREFRONT & CO-OP SCREEN -->
+            <section id="local-screen" class="screen">
+                <div class="screen-header">
+                    <div>
+                        <h2 id="storefront-header-title">🏪 Venture Mart</h2>
+                        <p class="subtitle">Scan customer items at the register, restock shelves, or run the shop with friends.</p>
+                    </div>
+                </div>
+
+                <!-- CO-OP MULTIPLAYER LOBBY BAR -->
+                <div class="panel coop-panel">
+                    <div class="coop-header-row">
+                        <div>
+                            <h3>🤝 Storefront Co-Op Lobby</h3>
+                            <p class="coop-desc">Create or join a Room Code to share this storefront register, inventory, and cash live with friends across tabs!</p>
+                        </div>
+                        <div id="coop-status-box" class="coop-offline">Offline (Solo Mode)</div>
+                    </div>
+
+                    <div id="coop-join-controls" class="coop-controls">
+                        <input type="text" id="coop-player-name" placeholder="Your Name (e.g. Alex)" maxlength="14">
+                        <input type="text" id="coop-room-input" placeholder="Room Code (e.g. SHOP)" maxlength="8" style="text-transform:uppercase;">
+                        <button class="btn btn-primary" onclick="joinCoopLobby()">Join / Create Lobby</button>
+                    </div>
+
+                    <div id="coop-active-controls" class="coop-active-bar" style="display:none;">
+                        <div>
+                            <span>Connected to Room: <strong id="coop-active-code" class="text-green">----</strong></span>
+                            <span class="coop-sep">•</span>
+                            <span>Active Staff: <strong id="coop-staff-list">You</strong></span>
+                        </div>
+                        <button class="btn btn-danger btn-xs" onclick="leaveCoopLobby()">Leave Lobby</button>
+                    </div>
+                </div>
+
+                <div class="two-col-grid">
+                    <!-- INTERACTIVE CASHIER REGISTER -->
+                    <div class="panel register-panel">
+                        <div class="register-top">
+                            <h3>🧾 Checkout Counter & Scanner</h3>
+                            <span id="low-stock-badge" class="low-stock-alert" style="display:none;">⚠️ LOW STOCK!</span>
+                        </div>
+
+                        <div id="customer-stage" class="customer-stage">
+                            <div id="customer-avatar" class="customer-avatar">⏳</div>
+                            <div class="customer-details">
+                                <h4 id="customer-status-title">Waiting for next customer...</h4>
+                                <p id="customer-basket-text">Keep your shelves stocked so shoppers walk in!</p>
+                            </div>
+                        </div>
+
+                        <div class="register-screen">
+                            <div class="reg-line"><span>ITEMS REMAINING IN BASKET:</span><strong id="reg-items-left">0</strong></div>
+                            <div class="reg-line"><span>CURRENT ORDER TOTAL:</span><strong class="text-green">$<span id="reg-order-total">0.00</span></strong></div>
+                        </div>
+
+                        <div class="btn-group" style="margin-top:14px;">
+                            <button id="scan-item-btn" class="btn btn-success btn-large full-width" onclick="scanCustomerItem()" disabled>🔊 Beep & Scan Item</button>
+                            <button id="auto-scan-btn" class="btn btn-beta full-width" onclick="buyOrToggleAutoScan()">🤖 Unlock Auto-Scanner ($400)</button>
+                        </div>
+                    </div>
+
+                    <!-- STORE SETTINGS & INVENTORY -->
+                    <div class="panel">
+                        <h3>⚙️ Shop Customization & Stock</h3>
+                        
+                        <label class="input-label">Rename Your Storefront</label>
+                        <div class="rename-row">
+                            <input type="text" id="shop-rename-input" placeholder="Enter new shop name..." maxlength="24">
+                            <button class="btn btn-primary" onclick="renameShop()">Save Name</button>
+                        </div>
+
+                        <label class="input-label">Select Store Niche & Catalog</label>
+                        <select id="local-niche-select" onchange="changeNiche()">
+                            <option value="food">🌮 Food Truck ($18–$32 items • Fast Traffic)</option>
+                            <option value="coffee">☕ Cozy Coffeehouse ($8–$16 items • Rapid Rush)</option>
+                            <option value="electronics">⚡ Electronics Boutique ($65–$140 items • High Ticket)</option>
+                            <option value="sneakers">👟 Luxury Sneaker Vault ($180–$350 items • VIP Clients)</option>
+                        </select>
+
+                        <div class="mini-stats">
+                            <div class="mini-stat-box">
+                                <span>Shelf Inventory</span>
+                                <strong id="local-inv-box"><span id="local-inv">12</span> units</strong>
+                            </div>
+                            <div class="mini-stat-box">
+                                <span>Total Customers Served</span>
+                                <strong><span id="local-served-count">0</span></strong>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary full-width" onclick="buyInventory()">📦 Restock Bulk Inventory (<span id="restock-btn-text">$100 for 15x Units</span>)</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>📡 Live Storefront & Co-Op Activity Log</h3>
+                    <div id="local-feed" class="live-log-box">
+                        <div class="log-muted">[POS] Register powered on. Ready to scan items!</div>
+                    </div>
+                </div>
+            </section>
+            <!-- FARM & KITCHEN SCREEN -->
+            <section id="farm-screen" class="screen">
+                <div class="screen-header">
+                    <div>
+                        <h2>Automated Farm & Kitchen</h2>
+                        <p class="subtitle">Grow 3 crops, upgrade farm machinery, and cook gourmet dishes.</p>
+                    </div>
+                </div>
+
+                <div class="two-col-grid">
+                    <div class="panel">
+                        <h3>🌱 Seed Supplier & Silo</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="buySeeds('wheat')">🌾 Wheat (<span id="cost-seed-w">5x • $10</span>)</button>
+                            <button class="btn btn-warning" onclick="buySeeds('tomato')">🍅 Tomato (<span id="cost-seed-t">3x • $25</span>)</button>
+                            <button class="btn btn-success" onclick="buySeeds('corn')">🌽 Corn (<span id="cost-seed-c">4x • $40</span>)</button>
+                        </div>
+                        <div class="silo-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="silo-item"><span>Wheat Seeds</span><strong id="farm-seeds-w">5</strong></div>
+                            <div class="silo-item"><span>Tomato Seeds</span><strong id="farm-seeds-t">3</strong></div>
+                            <div class="silo-item"><span>Corn Seeds</span><strong id="farm-seeds-c">2</strong></div>
+                            <div class="silo-item"><span>Raw Wheat</span><strong id="inv-wheat">0</strong></div>
+                            <div class="silo-item"><span>Raw Tomato</span><strong id="inv-tomato">0</strong></div>
+                            <div class="silo-item"><span>Raw Corn</span><strong id="inv-corn">0</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>🚜 Farm Equipment Upgrades</h3>
+                        <div class="upgrade-card" style="margin-bottom:12px;">
+                            <div class="upgrade-info">
+                                <h4>🚜 Harvester Yield</h4>
+                                <p>+1 extra crop harvested from every plot.</p>
+                                <span class="lvl-badge">Level <span id="up-yield-lvl">0</span></span>
+                            </div>
+                            <button class="btn btn-primary" onclick="buyFarmUpgrade('yield')">Upgrade ($<span id="up-yield-cost">250</span>)</button>
+                        </div>
+
+                        <div class="upgrade-card">
+                            <div class="upgrade-info">
+                                <h4>🛖 Roadside Farm Stand</h4>
+                                <p>Automatically sells raw crops every 8 seconds.</p>
+                                <span class="lvl-badge">Level <span id="up-stand-lvl">0</span></span>
+                            </div>
+                            <button class="btn btn-primary" onclick="buyFarmUpgrade('stand')">Upgrade ($<span id="up-stand-cost">400</span>)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🍳 Artisan Processing Kitchen</h3>
+                    <div class="kitchen-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="recipe-card">
+                            <h4>🍞 Fresh Bread</h4>
+                            <p class="recipe-req">3 Wheat</p>
+                            <div class="recipe-inv">Stock: <strong id="inv-bread">0</strong></div>
+                            <button class="btn btn-primary btn-sm" onclick="processFood('bread')">Bake</button>
+                            <button class="btn btn-success btn-sm" onclick="sellFood('bread')">Sell ($45)</button>
+                        </div>
+                        <div class="recipe-card">
+                            <h4>🍿 Butter Popcorn</h4>
+                            <p class="recipe-req">3 Corn</p>
+                            <div class="recipe-inv">Stock: <strong id="inv-popcorn">0</strong></div>
+                            <button class="btn btn-primary btn-sm" onclick="processFood('popcorn')">Pop</button>
+                            <button class="btn btn-success btn-sm" onclick="sellFood('popcorn')">Sell ($65)</button>
+                        </div>
+                        <div class="recipe-card">
+                            <h4>🍝 Tomato Pasta</h4>
+                            <p class="recipe-req">2 Wheat + 2 Tomato</p>
+                            <div class="recipe-inv">Stock: <strong id="inv-pasta">0</strong></div>
+                            <button class="btn btn-primary btn-sm" onclick="processFood('pasta')">Cook</button>
+                            <button class="btn btn-success btn-sm" onclick="sellFood('pasta')">Sell ($90)</button>
+                        </div>
+                        <div class="recipe-card">
+                            <h4>🌮 Supreme Feast</h4>
+                            <p class="recipe-req">2 Wheat + 2 Tom + 2 Corn</p>
+                            <div class="recipe-inv">Stock: <strong id="inv-feast">0</strong></div>
+                            <button class="btn btn-primary btn-sm" onclick="processFood('feast')">Craft</button>
+                            <button class="btn btn-success btn-sm" onclick="sellFood('feast')">Sell ($160)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🌱 Arable Farm Plots</h3>
+                    <div id="farmPlotsContainer" class="plots-grid"></div>
+                </div>
+
+                <div class="panel">
+                    <h3>📋 Farm & Kitchen Log</h3>
+                    <div id="farm-feed" class="live-log-box">
+                        <div class="log-muted">[FARM] Fields and processing kitchen online.</div>
+                    </div>
+                </div>
+            </section>
             <!-- DROPSHIPPING SCREEN -->
             <section id="dropshipping-screen" class="screen">
                 <div class="screen-header">
@@ -174,16 +372,12 @@
                         <h3>🚀 Launch New Product</h3>
                         <label class="input-label">Product Name</label>
                         <input type="text" id="drop-name" placeholder="e.g., Quantum Posture Corrector">
-                        
                         <label class="input-label">Retail Price ($)</label>
                         <input type="number" id="drop-price" placeholder="e.g., 49.99">
-                        
                         <label class="input-label">Landing Page Ad Copy</label>
                         <textarea id="drop-desc" placeholder="Tip: Use words like 'premium' or 'luxury' to boost conversions..." rows="3"></textarea>
-                        
                         <label class="input-label">Sketch Product Mockup</label>
                         <canvas id="productCanvas"></canvas>
-                        
                         <div class="btn-group">
                             <button class="btn btn-secondary" onclick="clearCanvas()">Clear Sketch</button>
                             <button class="btn btn-success" onclick="saveProduct()">Launch Campaign</button>
@@ -195,104 +389,6 @@
                         <div id="drop-feed" class="live-log-box">
                             <div class="log-muted">[SYS] Ready to launch your first campaign...</div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- LOCAL SCREEN -->
-            <section id="local-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>Local Storefront Operations</h2>
-                        <p class="subtitle">Manage foot traffic, inventory stock, and retail niches.</p>
-                    </div>
-                </div>
-
-                <div class="two-col-grid">
-                    <div class="panel">
-                        <h3>🏪 Franchise Management</h3>
-                        <label class="input-label">Select Storefront Niche</label>
-                        <select id="local-niche-select" onchange="changeNiche()">
-                            <option value="food">🌮 Food Truck ($25/sale • Fast Turnover)</option>
-                            <option value="electronics">⚡ Electronics Boutique ($75/sale • High Margin)</option>
-                        </select>
-
-                        <div class="mini-stats">
-                            <div class="mini-stat-box">
-                                <span>Inventory Stock</span>
-                                <strong><span id="local-inv">10</span> units</strong>
-                            </div>
-                            <div class="mini-stat-box">
-                                <span>Hourly Foot Traffic</span>
-                                <strong><span id="local-traffic-display">12</span> visitors</strong>
-                            </div>
-                        </div>
-
-                        <button class="btn btn-primary full-width" onclick="buyInventory()">Restock Bulk Inventory ($100 for 10x Units)</button>
-                    </div>
-
-                    <div class="panel">
-                        <h3>🧾 Point-of-Sale (POS) Feed</h3>
-                        <div id="local-feed" class="live-log-box">
-                            <div class="log-muted">[POS] Register open and awaiting customers...</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-                       <!-- FARM SCREEN -->
-            <section id="farm-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>Automated Farm & Kitchen</h2>
-                        <p class="subtitle">Harvest raw crops and process them into high-value artisan goods.</p>
-                    </div>
-                </div>
-
-                <div class="two-col-grid">
-                    <div class="panel">
-                        <h3>🌱 Seed Supplier & Silo</h3>
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="buySeeds('wheat')">🌾 Wheat Seeds (5x • $10)</button>
-                            <button class="btn btn-warning" onclick="buySeeds('tomato')">🍅 Tomato Seeds (3x • $25)</button>
-                        </div>
-                        <div class="silo-grid">
-                            <div class="silo-item"><span>Wheat Seeds</span><strong id="farm-seeds-w">5</strong></div>
-                            <div class="silo-item"><span>Tomato Seeds</span><strong id="farm-seeds-t">3</strong></div>
-                            <div class="silo-item"><span>Raw Wheat</span><strong id="inv-wheat">0</strong></div>
-                            <div class="silo-item"><span>Raw Tomato</span><strong id="inv-tomato">0</strong></div>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <h3>🍳 Artisan Processing Kitchen</h3>
-                        <div class="kitchen-grid">
-                            <div class="recipe-card">
-                                <h4>🍞 Fresh Bread</h4>
-                                <p class="recipe-req">Needs: 3 Raw Wheat</p>
-                                <div class="recipe-inv">Baked: <strong id="inv-bread">0</strong></div>
-                                <button class="btn btn-primary btn-sm" onclick="processFood('bread')">Bake</button>
-                                <button class="btn btn-success btn-sm" onclick="sellFood('bread')">Sell ($45)</button>
-                            </div>
-                            <div class="recipe-card">
-                                <h4>🍝 Tomato Pasta</h4>
-                                <p class="recipe-req">Needs: 2 Wheat + 2 Tomato</p>
-                                <div class="recipe-inv">Cooked: <strong id="inv-pasta">0</strong></div>
-                                <button class="btn btn-primary btn-sm" onclick="processFood('pasta')">Cook</button>
-                                <button class="btn btn-success btn-sm" onclick="sellFood('pasta')">Sell ($90)</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>🚜 Arable Farm Plots</h3>
-                    <div id="farmPlotsContainer" class="plots-grid"></div>
-                </div>
-
-                <div class="panel">
-                    <h3>📋 Farm & Kitchen Log</h3>
-                    <div id="farm-feed" class="live-log-box">
-                        <div class="log-muted">[FARM] Automation and processing kitchen online.</div>
                     </div>
                 </div>
             </section>
@@ -309,6 +405,17 @@
                 <div id="stock-grid-container" class="stocks-grid"></div>
             </section>
 
+            <!-- ACHIEVEMENTS SCREEN -->
+            <section id="achievements-screen" class="screen">
+                <div class="screen-header">
+                    <div>
+                        <h2>🏆 Career Achievements</h2>
+                        <p class="subtitle">Complete milestones from Easy to Impossible to prove your tycoon status.</p>
+                    </div>
+                </div>
+                <div id="achievements-grid" class="achievements-grid"></div>
+            </section>
+
             <!-- BETA TEST SCREEN -->
             <section id="beta-screen" class="screen">
                 <div class="screen-header">
@@ -320,7 +427,7 @@
 
                 <div class="panel beta-box" id="beta-lock-panel">
                     <h3>🔒 Enter Developer Passcode</h3>
-                    <p>Enter the 4-digit beta tester passcode to unlock infinite copywriting, unlimited upgrades, and free shop supplies.</p>
+                    <p>Enter the 4-digit beta tester passcode to unlock infinite copywriting, unlimited upgrades, free Auto-Scanner, and $0 shop supplies.</p>
                     <div class="beta-input-row">
                         <input type="password" id="beta-code-input" placeholder="••••" maxlength="4">
                         <button class="btn btn-beta" onclick="unlockBeta()">Unlock Beta Mode</button>
@@ -331,8 +438,8 @@
                     <h3>✅ Beta Tester Mode Active</h3>
                     <p>Your account has developer privileges enabled (standard cash balance remains active):</p>
                     <ul class="perk-list">
-                        <li><strong>Infinite Copywriting & HQ Upgrades:</strong> All upgrades start at Level 999 and cost $0 to level infinitely.</li>
-                        <li><strong>Free Supplies & Restocks:</strong> Local inventory restocks and farm seeds cost $0.</li>
+                        <li><strong>Infinite Copywriting & All Upgrades:</strong> HQ & Farm upgrades start at Lvl 999 and cost $0.</li>
+                        <li><strong>Free Supplies & Auto-Scanner:</strong> Store restocks, seeds, and Auto-Scanner cost $0.</li>
                     </ul>
                     <button class="btn btn-beta" onclick="maxOutUpgrades()">⚡ Boost All Upgrades (+100 Lvls)</button>
                 </div>
