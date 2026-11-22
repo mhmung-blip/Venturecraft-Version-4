@@ -51,7 +51,7 @@ section.on{animation:sin .32s ease-out}@keyframes sin{from{opacity:0;transform:t
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style><script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 <header><b>🚀 Venturecraft 4.0</b><span id="badge" class="tag"></span><span class="sp"></span><span class="pill"><span id="cashv"></span><span id="top"></span></span>
-<button onclick="document.body.classList.toggle('light')">🌓</button><button onclick="exp()" title="Export save">💾</button><button onclick="imp()" title="Import save">📥</button></header>
+<button onclick="document.body.classList.toggle('light')">🌓</button><button onclick="exp()" title="Export save">💾</button><button onclick="imp()" title="Import save">📥</button><button class="bad" onclick="resetGame()" title="Reset game">🗑️ Reset</button></header>
 <div class="wrap"><nav id="nav"></nav><main>
 <section id="dash"><h2>Dashboard</h2><p class="sub">Grow your empire. Income multiplier applies to every business (not trading).</p><div id="dd"></div></section>
 <section id="store"><h2 id="sh">Store</h2><p class="sub">Scan fast for combo bonuses. Press Space to scan. Customers leave if kept waiting.</p>
@@ -92,6 +92,7 @@ function toast(m,t=''){const d=document.createElement('div');d.className='toast 
 function log(id,m,c){const e=$(id),d=document.createElement('div');d.textContent=m;d.style.color=c||'var(--m)';e.prepend(d);while(e.children.length>40)e.lastChild.remove()}
 function beep(hi){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=hi?1560:1200;g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.12);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.12)}catch(e){}}
 function save(){S.t=Date.now();localStorage.setItem(KEY,JSON.stringify(S))}
+function resetGame(){if(!confirm('Reset the whole game? This deletes your cash, businesses, upgrades, achievements, Franchise points and beta settings. This cannot be undone.'))return;if(!confirm('Last chance: really wipe everything?'))return;leave();save=()=>{};localStorage.removeItem(KEY);toast('Game reset. Reloading…','bad');setTimeout(()=>location.reload(),500)}
 function exp(){prompt('Copy your save code:',btoa(unescape(encodeURIComponent(JSON.stringify(S)))))}
 function imp(){const c=prompt('Paste a save code:');if(!c)return;try{localStorage.setItem(KEY,decodeURIComponent(escape(atob(c))));location.reload()}catch(e){toast('That save code is invalid','bad')}}
 /* STORE */
