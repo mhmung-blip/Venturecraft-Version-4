@@ -1,456 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venturecraft — Entrepreneurship Simulator</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://googleapis.com" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div id="achievement-toast-container" class="toast-container"></div>
-
-    <!-- STARTUP MENU & TUTORIAL MODAL -->
-    <div id="welcome-modal" class="modal-overlay active">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span class="badge-pill">VERSION 3.0 • CO-OP & POS UPDATE</span>
-                <h1>Welcome to Venturecraft 🚀</h1>
-                <p>Run an interactive storefront with friends, automate farms, launch e-commerce brands, and unlock 14 achievements.</p>
-            </div>
-
-            <div class="tutorial-tabs">
-                <button class="tut-tab active" onclick="showTutorial('overview', this)">🎯 Goal</button>
-                <button class="tut-tab" onclick="showTutorial('local', this)">🏪 POS & Co-Op</button>
-                <button class="tut-tab" onclick="showTutorial('farm', this)">🌾 Farm & Kitchen</button>
-                <button class="tut-tab" onclick="showTutorial('dropship', this)">📦 Dropshipping</button>
-                <button class="tut-tab" onclick="showTutorial('stocks', this)">📈 Stocks</button>
-            </div>
-
-            <div class="tutorial-content">
-                <div id="tut-overview" class="tut-pane active">
-                    <h3>Your Path to Millions</h3>
-                    <p>Start with <strong>$1,000.00</strong> and grow across 4 industries. Complete <strong>14 Achievements</strong> ranging from Easy to Impossible, and invest in HQ Upgrades to multiply your profits.</p>
-                </div>
-                <div id="tut-local" class="tut-pane">
-                    <h3>🏪 Interactive Storefront & Co-Op Lobby</h3>
-                    <p>1. Rename your shop and pick from 4 niches (Food Truck, Coffeehouse, Electronics, or Sneaker Vault).<br>
-                       2. Wait for customers to step up to the register, then click <strong>Beep & Scan</strong> (or buy the <strong>Auto-Scanner</strong>) to ring up their items.<br>
-                       3. Join a <strong>Lobby Room Code</strong> to run the same shop live with friends across tabs!</p>
-                </div>
-                <div id="tut-farm" class="tut-pane">
-                    <h3>🌾 Expanded Farm & Kitchen</h3>
-                    <p>1. Plant <strong>Wheat</strong>, <strong>Tomatoes</strong>, or <strong>Golden Corn</strong>.<br>
-                       2. Buy Farm Upgrades like <strong>Tractor Yield</strong> and <strong>Roadside Stand</strong>.<br>
-                       3. Cook 4 artisan dishes in the Kitchen including the <strong>$160 Supreme Feast</strong>!</p>
-                </div>
-                <div id="tut-dropship" class="tut-pane">
-                    <h3>📦 E-Commerce & Dropshipping</h3>
-                    <p>Design products, write persuasive ad copy (use words like <em>"premium"</em> or <em>"luxury"</em>), sketch a mockup, and earn passive sales.</p>
-                </div>
-                <div id="tut-stocks" class="tut-pane">
-                    <h3>📈 High-Frequency Stock Market</h3>
-                    <p>Buy low when assets are <strong>UNWANTED</strong>, and sell high when alerts flash <strong>WANTED</strong>!</p>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-glow btn-large" onclick="closeWelcomeModal()">Enter Empire →</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOP NAVIGATION BAR -->
-    <header class="top-bar">
-        <div class="brand">
-            <span class="logo-icon">🚀</span>
-            <h2>Venturecraft</h2>
-            <span id="coop-top-badge" class="coop-pill" style="display:none;">🟢 LOBBY: <strong id="coop-top-code">----</strong></span>
-        </div>
-        <div class="top-stats">
-            <div class="cash-pill">
-                <span class="cash-label">AVAILABLE CAPITAL</span>
-                <span class="cash-amount">$<span class="global-cash-display">1000.00</span></span>
-            </div>
-            <button class="btn btn-secondary" onclick="openWelcomeModal()">📖 Guide</button>
-            <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Theme</button>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <aside class="sidebar">
-            <div class="nav-group-label">OPERATIONS</div>
-            <button class="nav-btn active" onclick="switchScreen('dashboard-screen', this)">📊 Dashboard</button>
-            <button class="nav-btn" onclick="switchScreen('local-screen', this)">🏪 Storefront & Co-Op</button>
-            <button class="nav-btn" onclick="startMode('farm', this)">🌾 Farm & Kitchen</button>
-            <button class="nav-btn" onclick="switchScreen('dropshipping-screen', this)">📦 Dropshipping</button>
-            <button class="nav-btn" onclick="switchScreen('stock-screen', this)">📈 Stock Market</button>
-            
-            <div class="nav-group-label" style="margin-top:18px;">PROGRESS & SYSTEM</div>
-            <button class="nav-btn nav-gold" onclick="switchScreen('achievements-screen', this)">🏆 Achievements (<span id="nav-ach-count">0</span>/14)</button>
-            <button class="nav-btn nav-beta" onclick="switchScreen('beta-screen', this)">🧪 Beta Test</button>
-            <button class="nav-btn nav-danger" onclick="resetGame()">🚨 Reset Save</button>
-        </aside>
-
-        <main class="content-area">
-            <!-- DASHBOARD SCREEN -->
-            <section id="dashboard-screen" class="screen active">
-                <div class="screen-header">
-                    <div>
-                        <h2>Executive Dashboard</h2>
-                        <p class="subtitle">Monitor your empire's metrics and upgrade headquarters.</p>
-                    </div>
-                </div>
-
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <span class="stat-title">Liquid Cash</span>
-                        <span class="stat-value text-green">$<span class="global-cash-display">1000.00</span></span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-title">Storefront Name</span>
-                        <span class="stat-value" id="dash-shop-name">Venture Mart</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-title">Achievements</span>
-                        <span class="stat-value text-gold"><span id="dash-ach-count">0</span> / 14</span>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>🏢 Headquarters Upgrades</h3>
-                    <div class="upgrades-grid">
-                        <div class="upgrade-card">
-                            <div class="upgrade-info">
-                                <h4>✍️ Copywriting Mastery</h4>
-                                <p>Boosts dropshipping ad conversion rates.</p>
-                                <span class="lvl-badge">Level <span id="up-copy-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyUpgrade('copywriting')">Upgrade ($<span id="up-copy-cost">200</span>)</button>
-                        </div>
-
-                        <div class="upgrade-card">
-                            <div class="upgrade-info">
-                                <h4>🎯 Tracking Pixel</h4>
-                                <p>Reduces price penalty on expensive dropship items.</p>
-                                <span class="lvl-badge">Level <span id="up-pixel-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyUpgrade('pixel')">Upgrade ($<span id="up-pixel-cost">350</span>)</button>
-                        </div>
-
-                        <div class="upgrade-card">
-                            <div class="upgrade-info">
-                                <h4>💡 Neon Storefront Lights</h4>
-                                <p>Attracts customers faster to your storefront register.</p>
-                                <span class="lvl-badge">Level <span id="up-lights-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyUpgrade('lights')">Upgrade ($<span id="up-lights-cost">250</span>)</button>
-                        </div>
-
-                        <div class="upgrade-card">
-                            <div class="upgrade-info">
-                                <h4>💧 Hydroponic Systems</h4>
-                                <p>Accelerates crop growth speed across all farm plots.</p>
-                                <span class="lvl-badge">Level <span id="up-hydro-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyUpgrade('hydroponic')">Upgrade ($<span id="up-hydro-cost">300</span>)</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- LOCAL STOREFRONT & CO-OP SCREEN -->
-            <section id="local-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2 id="storefront-header-title">🏪 Venture Mart</h2>
-                        <p class="subtitle">Scan customer items at the register, restock shelves, or run the shop with friends.</p>
-                    </div>
-                </div>
-
-                <!-- CO-OP MULTIPLAYER LOBBY BAR -->
-                <div class="panel coop-panel">
-                    <div class="coop-header-row">
-                        <div>
-                            <h3>🤝 Storefront Co-Op Lobby</h3>
-                            <p class="coop-desc">Create or join a Room Code to share this storefront register, inventory, and cash live with friends across tabs!</p>
-                        </div>
-                        <div id="coop-status-box" class="coop-offline">Offline (Solo Mode)</div>
-                    </div>
-
-                    <div id="coop-join-controls" class="coop-controls" style="grid-template-columns: 1fr 1fr auto auto;">
-                        <input type="text" id="coop-player-name" placeholder="Your Name (e.g. Alex)" maxlength="14">
-                        <input type="text" id="coop-room-input" placeholder="Room Code (e.g. SHOP)" maxlength="8" style="text-transform:uppercase;">
-                        <button class="btn btn-success" onclick="createCoopLobby()">Create Lobby</button>
-                        <button class="btn btn-primary" onclick="joinCoopLobby()">Join Lobby</button>
-                    </div>
-
-
-                    <div id="coop-active-controls" class="coop-active-bar" style="display:none;">
-                        <div>
-                            <span>Connected to Room: <strong id="coop-active-code" class="text-green">----</strong></span>
-                            <span class="coop-sep">•</span>
-                            <span>Active Staff: <strong id="coop-staff-list">You</strong></span>
-                        </div>
-                        <button class="btn btn-danger btn-xs" onclick="leaveCoopLobby()">Leave Lobby</button>
-                    </div>
-                </div>
-
-                <div class="two-col-grid">
-                    <!-- INTERACTIVE CASHIER REGISTER -->
-                    <div class="panel register-panel">
-                        <div class="register-top">
-                            <h3>🧾 Checkout Counter & Scanner</h3>
-                            <span id="low-stock-badge" class="low-stock-alert" style="display:none;">⚠️ LOW STOCK!</span>
-                        </div>
-
-                        <div id="customer-stage" class="customer-stage">
-                            <div id="customer-avatar" class="customer-avatar">⏳</div>
-                            <div class="customer-details">
-                                <h4 id="customer-status-title">Waiting for next customer...</h4>
-                                <p id="customer-basket-text">Keep your shelves stocked so shoppers walk in!</p>
-                            </div>
-                        </div>
-
-                        <div class="register-screen">
-                            <div class="reg-line"><span>ITEMS REMAINING IN BASKET:</span><strong id="reg-items-left">0</strong></div>
-                            <div class="reg-line"><span>CURRENT ORDER TOTAL:</span><strong class="text-green">$<span id="reg-order-total">0.00</span></strong></div>
-                        </div>
-
-                        <div class="btn-group" style="margin-top:14px;">
-                            <button id="scan-item-btn" class="btn btn-success btn-large full-width" onclick="scanCustomerItem()" disabled>🔊 Beep & Scan Item</button>
-                            <button id="auto-scan-btn" class="btn btn-beta full-width" onclick="buyOrToggleAutoScan()">🤖 Unlock Auto-Scanner ($400)</button>
-                        </div>
-                    </div>
-
-                    <!-- STORE SETTINGS & INVENTORY -->
-                    <div class="panel">
-                        <h3>⚙️ Shop Customization & Stock</h3>
-                        
-                        <label class="input-label">Rename Your Storefront</label>
-                        <div class="rename-row">
-                            <input type="text" id="shop-rename-input" placeholder="Enter new shop name..." maxlength="24">
-                            <button class="btn btn-primary" onclick="renameShop()">Save Name</button>
-                        </div>
-
-                        <label class="input-label">Select Store Niche & Catalog</label>
-                        <select id="local-niche-select" onchange="changeNiche()">
-                            <option value="food">🌮 Food Truck ($18–$32 items • Fast Traffic)</option>
-                            <option value="coffee">☕ Cozy Coffeehouse ($8–$16 items • Rapid Rush)</option>
-                            <option value="electronics">⚡ Electronics Boutique ($65–$140 items • High Ticket)</option>
-                            <option value="sneakers">👟 Luxury Sneaker Vault ($180–$350 items • VIP Clients)</option>
-                        </select>
-
-                        <div class="mini-stats">
-                            <div class="mini-stat-box">
-                                <span>Shelf Inventory</span>
-                                <strong id="local-inv-box"><span id="local-inv">12</span> units</strong>
-                            </div>
-                            <div class="mini-stat-box">
-                                <span>Total Customers Served</span>
-                                <strong><span id="local-served-count">0</span></strong>
-                            </div>
-                        </div>
-
-                        <button class="btn btn-primary full-width" onclick="buyInventory()">📦 Restock Bulk Inventory (<span id="restock-btn-text">$100 for 15x Units</span>)</button>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>📡 Live Storefront & Co-Op Activity Log</h3>
-                    <div id="local-feed" class="live-log-box">
-                        <div class="log-muted">[POS] Register powered on. Ready to scan items!</div>
-                    </div>
-                </div>
-            </section>
-            <!-- FARM & KITCHEN SCREEN -->
-            <section id="farm-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>Automated Farm & Kitchen</h2>
-                        <p class="subtitle">Grow 3 crops, upgrade farm machinery, and cook gourmet dishes.</p>
-                    </div>
-                </div>
-
-                <div class="two-col-grid">
-                    <div class="panel">
-                        <h3>🌱 Seed Supplier & Silo</h3>
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="buySeeds('wheat')">🌾 Wheat (<span id="cost-seed-w">5x • $10</span>)</button>
-                            <button class="btn btn-warning" onclick="buySeeds('tomato')">🍅 Tomato (<span id="cost-seed-t">3x • $25</span>)</button>
-                            <button class="btn btn-success" onclick="buySeeds('corn')">🌽 Corn (<span id="cost-seed-c">4x • $40</span>)</button>
-                        </div>
-                        <div class="silo-grid" style="grid-template-columns: repeat(3, 1fr);">
-                            <div class="silo-item"><span>Wheat Seeds</span><strong id="farm-seeds-w">5</strong></div>
-                            <div class="silo-item"><span>Tomato Seeds</span><strong id="farm-seeds-t">3</strong></div>
-                            <div class="silo-item"><span>Corn Seeds</span><strong id="farm-seeds-c">2</strong></div>
-                            <div class="silo-item"><span>Raw Wheat</span><strong id="inv-wheat">0</strong></div>
-                            <div class="silo-item"><span>Raw Tomato</span><strong id="inv-tomato">0</strong></div>
-                            <div class="silo-item"><span>Raw Corn</span><strong id="inv-corn">0</strong></div>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <h3>🚜 Farm Equipment Upgrades</h3>
-                        <div class="upgrade-card" style="margin-bottom:12px;">
-                            <div class="upgrade-info">
-                                <h4>🚜 Harvester Yield</h4>
-                                <p>+1 extra crop harvested from every plot.</p>
-                                <span class="lvl-badge">Level <span id="up-yield-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyFarmUpgrade('yield')">Upgrade ($<span id="up-yield-cost">250</span>)</button>
-                        </div>
-
-                        <div class="upgrade-card">
-                            <div class="upgrade-info">
-                                <h4>🛖 Roadside Farm Stand</h4>
-                                <p>Automatically sells raw crops every 8 seconds.</p>
-                                <span class="lvl-badge">Level <span id="up-stand-lvl">0</span></span>
-                            </div>
-                            <button class="btn btn-primary" onclick="buyFarmUpgrade('stand')">Upgrade ($<span id="up-stand-cost">400</span>)</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>🍳 Artisan Processing Kitchen</h3>
-                    <div class="kitchen-grid" style="grid-template-columns: repeat(4, 1fr);">
-                        <div class="recipe-card">
-                            <h4>🍞 Fresh Bread</h4>
-                            <p class="recipe-req">3 Wheat</p>
-                            <div class="recipe-inv">Stock: <strong id="inv-bread">0</strong></div>
-                            <button class="btn btn-primary btn-sm" onclick="processFood('bread')">Bake</button>
-                            <button class="btn btn-success btn-sm" onclick="sellFood('bread')">Sell ($45)</button>
-                        </div>
-                        <div class="recipe-card">
-                            <h4>🍿 Butter Popcorn</h4>
-                            <p class="recipe-req">3 Corn</p>
-                            <div class="recipe-inv">Stock: <strong id="inv-popcorn">0</strong></div>
-                            <button class="btn btn-primary btn-sm" onclick="processFood('popcorn')">Pop</button>
-                            <button class="btn btn-success btn-sm" onclick="sellFood('popcorn')">Sell ($65)</button>
-                        </div>
-                        <div class="recipe-card">
-                            <h4>🍝 Tomato Pasta</h4>
-                            <p class="recipe-req">2 Wheat + 2 Tomato</p>
-                            <div class="recipe-inv">Stock: <strong id="inv-pasta">0</strong></div>
-                            <button class="btn btn-primary btn-sm" onclick="processFood('pasta')">Cook</button>
-                            <button class="btn btn-success btn-sm" onclick="sellFood('pasta')">Sell ($90)</button>
-                        </div>
-                        <div class="recipe-card">
-                            <h4>🌮 Supreme Feast</h4>
-                            <p class="recipe-req">2 Wheat + 2 Tom + 2 Corn</p>
-                            <div class="recipe-inv">Stock: <strong id="inv-feast">0</strong></div>
-                            <button class="btn btn-primary btn-sm" onclick="processFood('feast')">Craft</button>
-                            <button class="btn btn-success btn-sm" onclick="sellFood('feast')">Sell ($160)</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h3>🌱 Arable Farm Plots</h3>
-                    <div id="farmPlotsContainer" class="plots-grid"></div>
-                </div>
-
-                <div class="panel">
-                    <h3>📋 Farm & Kitchen Log</h3>
-                    <div id="farm-feed" class="live-log-box">
-                        <div class="log-muted">[FARM] Fields and processing kitchen online.</div>
-                    </div>
-                </div>
-            </section>
-            <!-- DROPSHIPPING SCREEN -->
-            <section id="dropshipping-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>E-Commerce & Dropshipping</h2>
-                        <p class="subtitle">Design viral products, write ad copy, and launch automated campaigns.</p>
-                    </div>
-                </div>
-
-                <div class="two-col-grid">
-                    <div class="panel">
-                        <h3>🚀 Launch New Product</h3>
-                        <label class="input-label">Product Name</label>
-                        <input type="text" id="drop-name" placeholder="e.g., Quantum Posture Corrector">
-                        <label class="input-label">Retail Price ($)</label>
-                        <input type="number" id="drop-price" placeholder="e.g., 49.99">
-                        <label class="input-label">Landing Page Ad Copy</label>
-                        <textarea id="drop-desc" placeholder="Tip: Use words like 'premium' or 'luxury' to boost conversions..." rows="3"></textarea>
-                        <label class="input-label">Sketch Product Mockup</label>
-                        <canvas id="productCanvas"></canvas>
-                        <div class="btn-group">
-                            <button class="btn btn-secondary" onclick="clearCanvas()">Clear Sketch</button>
-                            <button class="btn btn-success" onclick="saveProduct()">Launch Campaign</button>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <h3>📡 Live Order Feed</h3>
-                        <div id="drop-feed" class="live-log-box">
-                            <div class="log-muted">[SYS] Ready to launch your first campaign...</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- STOCK SCREEN -->
-            <section id="stock-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>High-Frequency Asset Trading</h2>
-                        <p class="subtitle">Trade volatile digital assets and commodities in real time.</p>
-                    </div>
-                </div>
-                <div id="market-notification" class="alert-banner" style="display:none;"></div>
-                <div id="stock-grid-container" class="stocks-grid"></div>
-            </section>
-
-            <!-- ACHIEVEMENTS SCREEN -->
-            <section id="achievements-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>🏆 Career Achievements</h2>
-                        <p class="subtitle">Complete milestones from Easy to Impossible to prove your tycoon status.</p>
-                    </div>
-                </div>
-                <div id="achievements-grid" class="achievements-grid"></div>
-            </section>
-
-            <!-- BETA TEST SCREEN -->
-            <section id="beta-screen" class="screen">
-                <div class="screen-header">
-                    <div>
-                        <h2>🧪 Beta Test Access</h2>
-                        <p class="subtitle">Developer sandbox tools and infinite upgrade overrides.</p>
-                    </div>
-                </div>
-
-                <div class="panel beta-box" id="beta-lock-panel">
-                    <h3>🔒 Enter Developer Passcode</h3>
-                    <p>Enter the 4-digit beta tester passcode to unlock infinite copywriting, unlimited upgrades, free Auto-Scanner, and $0 shop supplies.</p>
-                    <div class="beta-input-row">
-                        <input type="password" id="beta-code-input" placeholder="••••" maxlength="4">
-                        <button class="btn btn-beta" onclick="unlockBeta()">Unlock Beta Mode</button>
-                    </div>
-                </div>
-
-                <div class="panel beta-box unlocked" id="beta-unlocked-panel" style="display:none;">
-                    <h3>✅ Beta Tester Mode Active</h3>
-                    <p>Your account has developer privileges enabled (standard cash balance remains active):</p>
-                    <ul class="perk-list">
-                        <li><strong>Infinite Copywriting & All Upgrades:</strong> HQ & Farm upgrades start at Lvl 999 and cost $0.</li>
-                        <li><strong>Free Supplies & Auto-Scanner:</strong> Store restocks, seeds, and Auto-Scanner cost $0.</li>
-                    </ul>
-                    <button class="btn btn-beta" onclick="maxOutUpgrades()">⚡ Boost All Upgrades (+100 Lvls)</button>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <script src="https://unpkg.com"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Venturecraft 4.0</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1e28;--p:#16293a;--c:#1d3548;--t:#eef2ee;--m:#8fa6b5;--a:#f2b84b;--g:#5fd3a0;--r:#ff7a6b;--b:rgba(143,166,181,.2);--sans:'Bricolage Grotesque',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+body.light{--bg:#f3efe6;--p:#fffdf8;--c:#ebe5d6;--t:#1b2a33;--m:#5f7380;--b:rgba(27,42,51,.16);--g:#12875c;--r:#c4412f;--a:#b57a00}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 var(--sans);background:var(--bg);color:var(--t)}
+header{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--p);border-bottom:1px solid var(--b);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header b{font-size:1.25rem;font-weight:800}.sp{flex:1}.pill{font:500 .95rem var(--mono);color:var(--a)}
+.wrap{display:flex;min-height:calc(100vh - 56px)}nav{width:190px;padding:14px 10px;background:var(--p);border-right:1px solid var(--b);display:flex;flex-direction:column;gap:4px}
+nav button{text-align:left;background:none;color:var(--m);border:0;padding:10px 12px;border-radius:8px;font:600 .95rem var(--sans);cursor:pointer}
+nav button.on{background:var(--a);color:#1b2a33}main{flex:1;padding:22px;max-width:1100px}
+section{display:none}section.on{display:block}h2{margin:0 0 4px;font-size:1.6rem;font-weight:800}h3{margin:0 0 10px;font-size:1.05rem}
+.sub{color:var(--m);margin:0 0 16px}.panel{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:16px;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.stat{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:12px}
+.stat small{display:block;color:var(--m)}.stat b{font:500 1.3rem var(--mono)}
+button{background:var(--c);color:var(--t);border:1px solid var(--b);border-radius:7px;padding:8px 12px;font:600 .88rem var(--sans);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--a)}button:disabled{opacity:.4;cursor:not-allowed}
+button.go{background:var(--a);color:#1b2a33;border-color:var(--a)}button.bad{color:var(--r)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+input,select,textarea{width:100%;padding:9px;margin:0 0 10px;background:var(--bg);color:var(--t);border:1px solid var(--b);border-radius:7px;font:inherit}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--g)}
+.cust{display:flex;gap:14px;align-items:center;background:var(--bg);border-radius:10px;padding:14px;margin-bottom:12px}.cust .av{font-size:2.4rem}
+.log{height:170px;overflow:auto;background:var(--bg);border-radius:8px;padding:10px;font:500 .8rem/1.6 var(--mono)}
+.spark{width:100%;height:42px;margin:6px 0;background:var(--bg);border-radius:6px}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:20}
+.toast{background:var(--c);border-left:4px solid var(--m);padding:10px 14px;border-radius:8px;max-width:300px;box-shadow:0 8px 24px #0006}
+.toast.ok{border-color:var(--g)}.toast.bad{border-color:var(--r)}.toast.ach{border-color:var(--a)}.toast.ev{border-color:#7ab8ff}
+.ach{opacity:.5}.ach.on{opacity:1;border-color:var(--a)}.tag{font-size:.75rem;color:var(--m)}
+body{background:radial-gradient(900px 500px at 8% -10%,#2a6a8566,transparent),radial-gradient(800px 500px at 100% 110%,#f2b84b26,transparent),var(--bg);background-attachment:fixed}
+header{backdrop-filter:blur(10px)}body.beta header{border-bottom-color:#a78bfa;box-shadow:0 2px 24px #a78bfa55}
+.panel,.stat{transition:transform .2s,border-color .2s,box-shadow .2s}.stat:hover{transform:translateY(-2px);border-color:var(--a);box-shadow:0 8px 20px #0003}
+button{transition:transform .12s,border-color .15s,background .15s,box-shadow .2s}button:active:not(:disabled){transform:scale(.94)}button.go:hover:not(:disabled){box-shadow:0 0 20px #f2b84b77}
+nav button{transition:background .2s,color .2s,transform .15s}nav button:hover:not(.on){background:var(--c);color:var(--t);transform:translateX(4px)}
+section.on{animation:sin .32s ease-out}@keyframes sin{from{opacity:0;transform:translateY(10px)}}
+#cashv{transition:color .3s,text-shadow .3s}#cashv.gain{color:var(--g);text-shadow:0 0 14px var(--g)}
+.toast{animation:ti .4s cubic-bezier(.2,1.3,.4,1)}@keyframes ti{from{transform:translateX(120%);opacity:0}}
+.cust.in{animation:ci .5s cubic-bezier(.2,1.3,.4,1)}.cust.in .av{display:inline-block;animation:bob .7s}
+@keyframes ci{from{transform:translateX(-40px) scale(.9);opacity:0}}@keyframes bob{40%{transform:translateY(-12px) rotate(-8deg)}70%{transform:translateY(0) rotate(5deg)}}
+.fl{position:fixed;pointer-events:none;z-index:30;font:700 1.15rem var(--mono);transform:translateX(-50%);animation:fl 1.1s ease-out forwards;text-shadow:0 2px 8px #0008}
+@keyframes fl{to{transform:translate(-50%,-70px);opacity:0}}
+.pa{position:fixed;pointer-events:none;z-index:30;animation:pa .9s ease-out forwards}@keyframes pa{to{transform:translate(var(--dx),var(--dy)) rotate(200deg);opacity:0}}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.bar i{transition:width .9s linear}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b)}.opt small{display:block;color:var(--m)}
+.opt input[type=checkbox]{width:42px;height:22px;margin:0;accent-color:#a78bfa}.opt select{width:auto;margin:0}
+@media(max-width:800px){.wrap{flex-direction:column}nav{width:100%;flex-direction:row;overflow-x:auto}.g2,.g3{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style><script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
+<header><b>🚀 Venturecraft 4.0</b><span id="badge" class="tag"></span><span class="sp"></span><span class="pill"><span id="cashv"></span><span id="top"></span></span>
+<button onclick="document.body.classList.toggle('light')">🌓</button><button onclick="exp()" title="Export save">💾</button><button onclick="imp()" title="Import save">📥</button></header>
+<div class="wrap"><nav id="nav"></nav><main>
+<section id="dash"><h2>Dashboard</h2><p class="sub">Grow your empire. Income multiplier applies to every business (not trading).</p><div id="dd"></div></section>
+<section id="store"><h2 id="sh">Store</h2><p class="sub">Scan fast for combo bonuses. Press Space to scan. Customers leave if kept waiting.</p>
+<div class="panel"><div class="row"><span>🤝 Co-op: <b id="cs" class="tag">Offline</b></span><span style="display:flex;gap:6px;flex-wrap:wrap"><input id="room" placeholder="Room code" maxlength="8" style="margin:0;width:120px"><button class="go" onclick="host()">Host</button><button onclick="join()">Join</button><button class="bad" onclick="leave()">Leave</button></span></div><p class="tag" style="margin:8px 0 0">One player presses Host with a code. Friends on any device press Join with the same code. The host's store is shared, and the guest who finishes a sale earns a 50% tip.</p></div>
+<div class="g2"><div class="panel"><h3>🧾 Register</h3><div id="cust"></div><button id="sbtn" class="go" style="width:100%;padding:12px" onclick="scan()">🔊 Scan item</button></div>
+<div class="panel"><h3>⚙️ Shop</h3><div class="row"><input id="rn" placeholder="New shop name" maxlength="24"><button onclick="rename()" style="margin-bottom:10px">Save</button></div>
+<select id="niche" onchange="setNiche(this.value)"></select><div class="g3"><div class="stat"><small>Stock</small><b id="inv"></b></div><div class="stat"><small>Served</small><b id="srv"></b></div><div class="stat"><small>Combo</small><b id="cmb"></b></div></div>
+<button style="width:100%;margin-top:10px" onclick="restock()">📦 Restock 15 units ($100)</button></div></div>
+<div class="panel"><h3>Activity</h3><div class="log" id="slog"></div></div></section>
+<section id="farm"><h2>Farm &amp; Kitchen</h2><p class="sub">Crops grow in real time, even while you're on another tab or away.</p>
+<div id="ff"></div><div class="panel"><h3>Log</h3><div class="log" id="flog"></div></div></section>
+<section id="ecom"><h2>E-commerce</h2><p class="sub">Launching costs $50 in ad spend. Strong copy (premium, luxury, limited, guarantee, free shipping, eco, exclusive) converts better. Products fatigue as they sell.</p>
+<div class="g2"><div class="panel"><h3>🚀 New product</h3><input id="pn" placeholder="Product name" maxlength="30"><input id="pp" type="number" min="1" placeholder="Retail price ($)"><textarea id="pd" rows="3" placeholder="Ad copy"></textarea><button class="go" style="width:100%" onclick="launch()">Launch campaign ($50)</button></div>
+<div class="panel"><h3 id="slots">Live products</h3><div id="prods"></div></div></div>
+<div class="panel"><h3>Order feed</h3><div class="log" id="elog"></div></div></section>
+<section id="mkt"><h2>Market</h2><p class="sub">Assets move every 3 seconds, news events shake things up. Trading profit doesn't count toward Franchise.</p><div id="mk" class="g4"></div></section>
+<section id="ach"><h2>Achievements</h2><p class="sub">Each unlocked achievement adds +2% income, and they survive Franchise resets.</p><div id="ac" class="g4"></div></section>
+<section id="beta"><h2>🧪 Beta lab</h2><p class="sub">Testing tools and cheats. Toggle things on and off anytime.</p>
+<div class="panel" id="bl"><h3>🔒 Enter passcode</h3><div class="row"><input id="bc" type="password" maxlength="4" placeholder="4 digits" onkeydown="if(event.key=='Enter')unlockBeta()" style="margin:0"><button class="go" onclick="unlockBeta()">Unlock</button></div></div><div id="bo" style="display:none"></div></section>
+</main></div><div id="toasts"></div>
+<script>
+const $=i=>document.getElementById(i),R=Math.random,fm=n=>'$'+(n>=1e15?n.toExponential(2):n>=1e12?(n/1e12).toFixed(2)+'T':n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e4?(n/1e3).toFixed(1)+'K':n.toFixed(2)),esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const KEY='venturecraft_v4',TABS=[['dash','📊 Dashboard'],['store','🏪 Store'],['farm','🌾 Farm'],['ecom','📦 E-commerce'],['mkt','📈 Market'],['ach','🏆 Achievements'],['beta','🧪 Beta']];
+const NICHES={food:{n:'🌮 Food Truck',i:['Taco','Nachos','Churros','Burrito'],lo:18,hi:32},coffee:{n:'☕ Coffeehouse',i:['Latte','Macchiato','Croissant','Matcha'],lo:8,hi:16},electronics:{n:'⚡ Electronics',i:['Earbuds','Smart Watch','Keyboard','Monitor'],lo:65,hi:140},sneakers:{n:'👟 Sneaker Vault',i:['Retro Highs','Runner','Slides','Collector Box'],lo:180,hi:350}};
+const UPG=[{id:'rep',n:'⭐ Brand Reputation',d:'+10% all income per level',base:500},{id:'lights',n:'💡 Neon Lights',d:'+8% foot traffic per level',base:250},{id:'auto',n:'🤖 Auto-Scanner',d:'Scans for you, faster per level',base:400},{id:'copy',n:'✍️ Copywriting',d:'+8 conversion score and +1 product slot per level',base:200},{id:'hydro',n:'💧 Hydroponics',d:'+25% crop speed per level',base:300},{id:'yield',n:'🚜 Harvester',d:'+1 crop per harvest per level',base:250},{id:'stand',n:'🛖 Roadside Stand',d:'Auto-sells raw crops, faster per level',base:400}].map(u=>({...u,max:10}));
+const CROPS={wheat:{e:'🌾',cost:2,sell:8,t:20},tomato:{e:'🍅',cost:5,sell:14,t:35},corn:{e:'🌽',cost:8,sell:20,t:50}};
+const REC={bread:{n:'🍞 Bread',need:{wheat:3},price:45},popcorn:{n:'🍿 Popcorn',need:{corn:3},price:65},pasta:{n:'🍝 Pasta',need:{wheat:2,tomato:2},price:90},feast:{n:'🌮 Supreme Feast',need:{wheat:2,tomato:2,corn:2},price:160}};
+const STK={'67coin':[10,.15],Bitcoin:[100,.08],Moscoin:[5,.25],Gold:[50,.03],'One Piece':[1000,.8]},KW=['premium','luxury','limited','guarantee','free shipping','eco','exclusive'];
+const def=()=>({cash:1000,earned:0,fr:0,t:Date.now(),name:'Venture Mart',niche:'food',stock:12,served:0,u:{},plots:Array(6).fill(null),inv:{wheat:0,tomato:0,corn:0,bread:0,popcorn:0,pasta:0,feast:0},prods:[],hold:{},ach:{},st:{},px:{},boost:0,traf:0,b:{}});
+let S=def(),cur=null,peer=null,conns=[],isHost=false,room='',hostConn=null,bk=null,dc=0,combo=0,lastScan=0,autoT=0,standT=0,ecomT=0,tk=0,tab='dash',ch=null,actx=null;
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)))}catch(e){}
+function initpx(){for(const k in STK)if(!S.px[k])S.px[k]={p:STK[k][0],h:[STK[k][0]]}}initpx();
+const lv=id=>S.u[id]||0,ucost=u=>Math.round(u.base*1.6**lv(u.id)),acount=()=>Object.keys(S.ach).length;
+const mult=()=>(1+.1*lv('rep')+.25*S.fr+.02*acount())*(Date.now()<S.boost?1.5:1)*((S.b.on&&S.b.inc)||1);
+function earn(n){n*=mult();S.cash+=n;S.earned+=n;return n}
+function spend(n){if(S.b.on&&S.b.inf)return true;if(S.cash<n){toast('Need '+fm(n)+' — you have '+fm(S.cash),'bad');return false}S.cash-=n;return true}
+function toast(m,t=''){const d=document.createElement('div');d.className='toast '+t;d.textContent=m;$('toasts').append(d);setTimeout(()=>d.remove(),3800)}
+function log(id,m,c){const e=$(id),d=document.createElement('div');d.textContent=m;d.style.color=c||'var(--m)';e.prepend(d);while(e.children.length>40)e.lastChild.remove()}
+function beep(hi){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=hi?1560:1200;g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.12);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.12)}catch(e){}}
+function save(){S.t=Date.now();localStorage.setItem(KEY,JSON.stringify(S))}
+function exp(){prompt('Copy your save code:',btoa(unescape(encodeURIComponent(JSON.stringify(S)))))}
+function imp(){const c=prompt('Paste a save code:');if(!c)return;try{localStorage.setItem(KEY,decodeURIComponent(escape(atob(c))));location.reload()}catch(e){toast('That save code is invalid','bad')}}
+/* STORE */
+function spawn(){const n=NICHES[S.niche];cur={age:0,av:['🧑','👩','🧔','👱‍♀️','🧕','👴','👩‍💼','🧑‍🎓'][R()*8|0],pat:25,tot:0,bk:Array.from({length:Math.min(S.stock,1+(R()*3|0))},()=>({n:n.i[R()*4|0],p:+(n.lo+R()*(n.hi-n.lo)).toFixed(2)}))}}
+function scan(){if(!cur)return;if(hostConn){hostConn.send({t:'scan'});beep();return}doScan(null)}
+function doScan(w){if(!cur)return;if(S.stock<=0){cur=null;return toast('Out of stock — restock your shelves','bad')}
+const it=cur.bk.shift(),now=Date.now();S.stock--;cur.tot+=it.p;combo=now-lastScan<1600?Math.min(combo+1,10):0;lastScan=now;S.st.cb=Math.max(S.st.cb||0,combo);beep(!cur.bk.length);
+if(cur.bk.length)log('slog',`🔊 ${it.n} ${fm(it.p)}`);else{const e=earn(cur.tot*(1+combo*.05));S.served++;if(w&&w.open)w.send({t:'tip',v:e*.5});fxb('+'+fm(e),$('cust'));log('slog',`💰 Checkout +${fm(e)}${combo?' (combo ×'+(1+combo*.05).toFixed(2)+')':''}`,'var(--g)');cur=null}
+sync();render()}
+function restock(){if(hostConn)return hostConn.send({t:'restock'});if(spend(100)){S.stock+=15;log('slog','📦 Restocked +15 units (-$100)');sync();render()}}
+function rename(){const v=$('rn').value.trim();if(!v)return toast('Enter a shop name','bad');if(hostConn){hostConn.send({t:'name',v});$('rn').value='';return}S.name=v;$('rn').value='';sync();render()}
+const rc=()=>{const r=$('room').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(!r)toast('Enter a room code first','bad');return r};
+const snap=()=>({stock:S.stock,served:S.served,name:S.name,niche:S.niche,cur,combo});
+function netStatus(t){$('badge').textContent=t;$('cs').textContent=t||'Offline'}
+function upd(){netStatus(`🟢 Hosting ${room} · ${conns.length} guest${conns.length==1?'':'s'}`)}
+function sync(){conns.forEach(c=>c.open&&c.send({t:'s',d:snap()}))}
+function apply(d){Object.assign(S,{stock:d.stock,served:d.served,name:d.name,niche:d.niche});cur=d.cur;combo=d.combo||0;render()}
+function setNiche(v){if(hostConn)return hostConn.send({t:'niche',v});S.niche=v;cur=null;sync();render()}
+function act(m,c){if(m.t=='scan')doScan(c);else if(m.t=='restock')restock();else if(m.t=='name'&&typeof m.v=='string')S.name=m.v.slice(0,24);else if(m.t=='niche'&&NICHES[m.v]){S.niche=m.v;cur=null}sync();render()}
+function host(){const r=rc();if(!r)return;leave();if(!window.Peer)return toast('Online play needs internet access to load PeerJS','bad');isHost=true;room=r;netStatus('⏳ Starting…');peer=new Peer('vc4-'+r);
+peer.on('error',e=>{toast(e.type=='unavailable-id'?'Room '+r+' is already hosted. Pick another code, or press Join.':'Network error: '+e.type,'bad');leave()});
+peer.on('open',()=>{upd();S.st.c=1;toast('Hosting room '+r+'. Friends on any device can join with this code.','ok')});
+peer.on('connection',c=>{c.on('open',()=>{conns.push(c);c.send({t:'s',d:snap()});upd()});c.on('data',m=>act(m,c));c.on('close',()=>{conns=conns.filter(x=>x!=c);upd()})})}
+function join(){const r=rc();if(!r)return;leave();if(!window.Peer)return toast('Online play needs internet access to load PeerJS','bad');room=r;bk={stock:S.stock,served:S.served,name:S.name,niche:S.niche};netStatus('⏳ Connecting…');peer=new Peer();
+peer.on('error',e=>{toast(e.type=='peer-unavailable'?'No host found for room '+r+'. Ask them to press Host first.':'Network error: '+e.type,'bad');leave()});
+peer.on('open',()=>{const c=peer.connect('vc4-'+r,{reliable:true});hostConn=c;
+c.on('open',()=>{netStatus('🟢 Joined '+r);S.st.c=1;toast('Joined '+r+". You're running the host's store. Finish sales to earn tips.",'ok')});
+c.on('data',m=>{if(m.t=='s')apply(m.d);else if(m.t=='tip'){const e=earn(m.v);fxb('+'+fm(e)+' tip',$('cust'));toast('💸 Tip +'+fm(e),'ok')}});
+c.on('close',()=>{toast('The host left the room','bad');leave()})})}
+function leave(){if(hostConn&&bk)Object.assign(S,bk);bk=null;conns.forEach(c=>c.close());conns=[];if(peer)peer.destroy();peer=null;hostConn=null;isHost=false;cur=null;netStatus('');render()}
+/* FARM */
+const speed=()=>(1+.25*lv('hydro'))*((S.b.on&&S.b.spd)||1),prog=p=>S.b.on&&S.b.ig?1:Math.min(1,(Date.now()-p.s)/1000*speed()/CROPS[p.c].t);
+function plant(i,c){if(spend(CROPS[c].cost)){S.plots[i]={c,s:Date.now()};render()}}
+function harvest(i){const p=S.plots[i];if(!p||prog(p)<1)return;S.inv[p.c]+=2+lv('yield');S.plots[i]=null;S.st.h=1;fxb('+'+(2+lv('yield'))+' '+p.c,$('ff'));log('flog',`✨ Harvested ${2+lv('yield')} ${p.c}`,'var(--g)');render()}
+function harvestAll(){S.plots.forEach((_,i)=>harvest(i))}
+function plotCost(){return Math.round(150*1.8**(S.plots.length-6))}
+function buyPlot(){if(S.plots.length<12&&spend(plotCost())){S.plots.push(null);render()}}
+function make(k){const r=REC[k];if(!Object.entries(r.need).every(([c,n])=>S.inv[c]>=n))return toast('Not enough raw crops','bad');for(const c in r.need)S.inv[c]-=r.need[c];S.inv[k]++;if(k=='feast')S.st.f=1;render()}
+function sellF(k){if(S.inv[k]<1)return;S.inv[k]--;const e=earn(REC[k].price);fxb('+'+fm(e),$('ff'));log('flog','💰 Sold '+REC[k].n+' +'+fm(e),'var(--g)');render()}
+/* ECOM */
+function launch(){const n=$('pn').value.trim(),p=parseFloat($('pp').value),d=$('pd').value.toLowerCase();if(!n||!(p>0)||d.length<5)return toast('Add a name, a price and some ad copy','bad');
+if(S.prods.length>=3+lv('copy'))return toast('Product slots full. Retire one or upgrade Copywriting.','bad');if(!spend(50))return;
+const sc=25+(d.length>25)*20+(d.length>70)*20+Math.min(4,KW.filter(k=>d.includes(k)).length)*10+lv('copy')*8,conv=Math.min(95,Math.max(6,sc-p/3));
+S.prods.push({n,p,conv,sales:0,rev:0});S.st.l=1;['pn','pp','pd'].forEach(i=>$(i).value='');log('elog',`🚀 "${n}" launched at ${Math.round(conv)}% conversion`,'var(--a)');render()}
+/* MARKET */
+function mtick(){for(const k in STK){const a=S.px[k],v=STK[k][1];let ch=(R()-.48)*2*v;if(k=='One Piece')ch=R()<.01?5:(R()-.65)*v;a.p=Math.max(.5,a.p*(1+ch));a.h.push(a.p);if(a.h.length>24)a.h.shift()}}
+function buy(k,a){if(a<=.01||!spend(a))return;S.hold[k]=(S.hold[k]||0)+a/S.px[k].p;render()}
+function sell(k,f){const u=S.hold[k]||0;if(!u)return;S.cash+=u*f*S.px[k].p;S.hold[k]=u*(1-f);render()}
+const mk=(f,ks)=>(ks||Object.keys(STK)).forEach(k=>S.px[k].p*=f);
+const EV=[['📱 Viral post! Customer traffic ×2 for 40s',()=>S.traf=Date.now()+4e4],['🎉 Local festival! All income +50% for 45s',()=>S.boost=Date.now()+45e3],['🕵️ Health inspector fines you $75',()=>S.cash=Math.max(0,S.cash-75)],['📉 Market crash! All assets −25%',()=>mk(.75)],['🚀 Crypto pump! Bitcoin and 67coin +30%',()=>mk(1.3,['Bitcoin','67coin'])],['🎁 Angel investor tips you $250',()=>earn(250)]];
+/* PROGRESSION */
+const AC=[['scan','easy','First Sale','Serve your first customer',()=>S.served>=1],['ren','easy','Grand Reopening','Rename your store',()=>S.name!='Venture Mart'],['har','easy','Green Thumb','Harvest a crop',()=>S.st.h],['lau','easy','Digital Marketer','Launch a product',()=>S.st.l],
+['s25','medium','Local Favorite','Serve 25 customers',()=>S.served>=25],['fea','medium','Master Chef','Craft a Supreme Feast',()=>S.st.f],['aut','medium','Automation Age','Buy the Auto-Scanner',()=>lv('auto')>0],['coo','medium','Business Partners','Join a co-op room',()=>S.st.c],
+['c10','hard','Five-Figure Founder','Hold $10,000',()=>S.cash>=1e4],['s100','hard','Retail Tycoon','Serve 100 customers',()=>S.served>=100],['hq','hard','Maxed Out','Max any upgrade',()=>UPG.some(u=>lv(u.id)>=u.max)],['cmb','hard','Speed Demon','Hit a ×1.5 scan combo',()=>S.st.cb>=10],
+['c100','impossible','Six-Figure Empire','Hold $100,000',()=>S.cash>=1e5],['c1m','impossible','Venture Mogul','Hold $1,000,000',()=>S.cash>=1e6],['op','impossible','King of the Pirates','Own 5 One Piece units',()=>(S.hold['One Piece']||0)>=5],['fra','impossible','Franchise Owner','Franchise once',()=>S.fr>0]];
+const fgain=()=>Math.floor(Math.sqrt(S.earned/25000)),worth=()=>S.cash+Object.keys(S.hold).reduce((t,k)=>t+S.hold[k]*S.px[k].p,0);
+function franchise(){const g=fgain();if(g<1)return;if(!confirm(`Franchise: reset your businesses and cash for +${g} permanent point(s) (+${g*25}% income). Achievements are kept.`))return;S=Object.assign(def(),{fr:S.fr+g,ach:S.ach,st:S.st,name:S.name,b:S.b});initpx();cur=null;save();render()}
+function buyU(id){const u=UPG.find(x=>x.id==id);if(lv(id)>=u.max||!spend(ucost(u)))return;S.u[id]=lv(id)+1;toast(u.n+' is now level '+lv(id),'ok');render()}
+/* RENDER */
+function rDash(){const g=fgain();$('dd').innerHTML=`<div class="g4" style="margin-bottom:16px"><div class="stat"><small>Cash</small><b>${S.b.on&&S.b.inf?'∞':fm(S.cash)}</b></div><div class="stat"><small>Net worth</small><b>${S.b.on&&S.b.inf?'∞':fm(worth())}</b></div><div class="stat"><small>Earned this run</small><b>${fm(S.earned)}</b></div><div class="stat"><small>Income multiplier</small><b>×${mult().toFixed(2)}</b></div></div>
+<div class="panel"><h3>🏢 Upgrades</h3><div class="g4">${UPG.map(u=>`<div class="stat"><b style="font:700 1rem var(--sans)">${u.n}</b> <span class="tag">Lv ${lv(u.id)}/${u.max}</span><small>${u.d}</small><button style="margin-top:8px;width:100%" ${lv(u.id)>=u.max?'disabled':''} onclick="buyU('${u.id}')">${lv(u.id)>=u.max?'Maxed':'Upgrade '+fm(ucost(u))}</button></div>`).join('')}</div></div>
+<div class="panel"><h3>🏛️ Franchise (${S.fr} point${S.fr==1?'':'s'}, +${S.fr*25}% income)</h3><p class="sub">Reset to start over with a permanent bonus. Earn ${fm(25000)} in one run for your first point; more earnings give more points.</p><button class="go" ${g<1?'disabled':''} onclick="franchise()">${g<1?'Earn '+fm(25000)+' to unlock':'Franchise now for +'+g+' point(s)'}</button></div>`}
+function rStore(){const n=NICHES[S.niche];$('sh').textContent='🏪 '+S.name;if(!$('niche').options.length)$('niche').innerHTML=Object.keys(NICHES).map(k=>`<option value="${k}">${NICHES[k].n} (${fm(NICHES[k].lo)}–${fm(NICHES[k].hi)})</option>`).join('');$('niche').value=S.niche;
+$('cust').innerHTML=cur?`<div class="cust ${(cur.age||0)<1?'in':''}"><span class="av">${cur.av}</span><div style="flex:1"><b>${cur.bk.length} item(s) left · ${fm(cur.tot)} so far</b><br><span class="tag">Next: ${cur.bk[0]?esc(cur.bk[0].n)+' '+fm(cur.bk[0].p):''}</span><div class="bar"><i style="width:${lv('auto')?100:cur.pat/25*100}%;background:${cur.pat<8&&!lv('auto')?'var(--r)':'var(--g)'}"></i></div></div></div>`:`<div class="cust"><span class="av">${S.stock>0?'⏳':'🚫'}</span><b>${S.stock>0?'Waiting for the next customer…':'Out of stock. Restock to reopen.'}</b></div>`;
+$('sbtn').disabled=!cur;$('inv').textContent=S.stock;$('srv').textContent=S.served;$('cmb').textContent='×'+(1+combo*.05).toFixed(2)}
+function rFarm(){const rows=Object.keys(CROPS);$('ff').innerHTML=`<div class="g4" style="margin-bottom:16px">${['wheat','tomato','corn'].map(c=>`<div class="stat"><small>Raw ${c}</small><b>${CROPS[c].e} ${S.inv[c]}</b></div>`).join('')}</div>
+<div class="panel"><div class="row"><h3>🌱 Plots (${S.plots.length}/12)</h3><span><button onclick="harvestAll()">Harvest all ready</button> <button ${S.plots.length>=12?'disabled':''} onclick="buyPlot()">Buy plot ${S.plots.length>=12?'':fm(plotCost())}</button></span></div><div class="g4">${S.plots.map((p,i)=>!p?`<div class="stat"><b>Plot ${i+1}</b><div class="row" style="margin-top:6px">${rows.map(c=>`<button onclick="plant(${i},'${c}')" title="${c}: ${fm(CROPS[c].cost)}">${CROPS[c].e} ${fm(CROPS[c].cost)}</button>`).join('')}</div></div>`:prog(p)>=1?`<div class="stat"><b>${CROPS[p.c].e} Ready</b><button class="go" style="width:100%;margin-top:6px" onclick="harvest(${i})">Harvest</button></div>`:`<div class="stat"><b>${CROPS[p.c].e} Growing</b><div class="bar"><i style="width:${prog(p)*100}%"></i></div></div>`).join('')}</div></div>
+<div class="panel"><h3>🍳 Kitchen</h3><div class="g4">${Object.keys(REC).map(k=>`<div class="stat"><b>${REC[k].n}</b><small>Needs ${Object.entries(REC[k].need).map(([c,n])=>n+' '+c).join(' + ')} · Stock ${S.inv[k]}</small><div class="row" style="margin-top:8px"><button onclick="make('${k}')">Cook</button><button class="go" onclick="sellF('${k}')">Sell ${fm(REC[k].price)}</button></div></div>`).join('')}</div></div>`}
+function rEcom(){$('slots').textContent=`Live products (${S.prods.length}/${3+lv('copy')})`;$('prods').innerHTML=S.prods.length?S.prods.map((p,i)=>`<div class="stat" style="margin-bottom:8px"><div class="row"><b>${esc(p.n)} · ${fm(p.p)}</b><button class="bad" onclick="S.prods.splice(${i},1);render()">Retire</button></div><small>${Math.round(p.conv)}% conversion · ${p.sales} sales · ${fm(p.rev)} earned</small></div>`).join(''):'<p class="sub">No products yet. Launch one to earn passive income.</p>'}
+function rMkt(){$('mk').innerHTML=Object.keys(STK).map(k=>{const a=S.px[k],h=a.h,mn=Math.min(...h),r=Math.max(...h)-mn||1,up=h.length<2||h[h.length-1]>=h[h.length-2],c=up?'var(--g)':'var(--r)',pts=h.length>1?h.map((v,i)=>`${i/(h.length-1)*100},${36-(v-mn)/r*32}`).join(' '):'0,20 100,20',o=S.hold[k]||0;
+return `<div class="panel" style="margin:0;border-color:${c}"><div class="row"><b>${k}</b><b style="color:${c}">${fm(a.p)} ${up?'▲':'▼'}</b></div><small class="tag">Owned ${o.toFixed(3)} (${fm(o*a.p)})</small><svg viewBox="0 0 100 40" preserveAspectRatio="none" class="spark"><polyline fill="none" stroke="${c}" stroke-width="2" points="${pts}"/></svg><div class="row"><button onclick="buy('${k}',100)">$100</button><button onclick="buy('${k}',S.cash*.25)">25%</button><button class="bad" onclick="sell('${k}',.5)">½</button><button class="bad" onclick="sell('${k}',1)">All</button></div></div>`}).join('')}
+function rAch(){$('ac').innerHTML=AC.map(a=>`<div class="stat ach ${S.ach[a[0]]?'on':''}"><span class="tag">${a[1]} · ${S.ach[a[0]]?'unlocked':'locked'}</span><br><b>${a[2]}</b><small>${a[3]}</small></div>`).join('')}
+const RN={dash:rDash,store:rStore,farm:rFarm,ecom:rEcom,mkt:rMkt,ach:rAch,beta:rBeta};
+function render(){document.body.classList.toggle('beta',!!S.b.on);$('top').textContent=` · ×${mult().toFixed(2)}${Date.now()<S.boost?' 🎉':''}${Date.now()<S.traf?' 📱':''}`;RN[tab]()}
+function show(t){tab=t;TABS.forEach(([id])=>$(id).classList.toggle('on',id==t));[...$('nav').children].forEach((b,i)=>b.classList.toggle('on',TABS[i][0]==t));render()}
+$('nav').innerHTML=TABS.map(([id,l])=>`<button onclick="show('${id}')">${l}</button>`).join('');
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code=='Space'&&tab=='store'){e.preventDefault();scan()}const i=+e.key;if(i>=1&&i<=7)show(TABS[i-1][0])});
+/* SMOOTHNESS: skip DOM writes when nothing changed, so hover states and animations survive */
+(()=>{const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');Object.defineProperty(Element.prototype,'innerHTML',{get(){return d.get.call(this)},set(h){if(this._h!==h){this._h=h;d.set.call(this,h)}}})})();
+/* EFFECTS */
+const pt=el=>{const r=el.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+function burst(x,y,n=12,sy=['✨','💰','⭐']){for(let i=0;i<n;i++){const e=document.createElement('span'),a=R()*6.283,d=40+R()*90;e.className='pa';e.textContent=sy[R()*sy.length|0];e.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-30}px`;document.body.append(e);setTimeout(()=>e.remove(),900)}}
+function fxb(t,el,c){if(!el||!el.offsetParent)return;const[x,y]=pt(el),e=document.createElement('span');e.className='fl';e.textContent=t;e.style.cssText=`left:${x+R()*60-30}px;top:${y}px;color:${c||'var(--g)'}`;document.body.append(e);setTimeout(()=>e.remove(),1100);burst(x,y,8)}
+function confetti(){for(let i=0;i<6;i++)setTimeout(()=>burst(R()*innerWidth,innerHeight*.3,14,['🎉','✨','🪙','⭐']),i*120)}
+function flash(){document.body.animate([{boxShadow:'inset 0 0 140px #7ab8ffaa'},{boxShadow:'inset 0 0 0 #0000'}],{duration:1000})}
+function anim(){dc+=(S.cash-dc)*.12;if(Math.abs(S.cash-dc)<.005)dc=S.cash;const e=$('cashv');e.textContent=S.b.on&&S.b.inf?'∞':fm(dc);e.classList.toggle('gain',S.cash-dc>.5);requestAnimationFrame(anim)}dc=S.cash;anim();
+addEventListener('beforeunload',()=>{if(peer)peer.destroy()});
+/* BETA LAB */
+function unlockBeta(){const i=$('bc');if(i.value.trim()=='3105'){S.b.on=true;i.value='';toast('🧪 Beta lab unlocked','ach');confetti();render()}else{toast('Wrong passcode','bad');i.classList.add('shake');setTimeout(()=>i.classList.remove('shake'),400)}}
+function bset(k,v){S.b[k]=v;render()}
+const BT={max:()=>UPG.forEach(u=>S.u[u.id]=Math.max(lv(u.id),u.max)),boost:()=>UPG.forEach(u=>S.u[u.id]=lv(u.id)+10),m1:()=>S.cash+=1e6,m2:()=>S.cash+=1e9,ach:()=>AC.forEach(a=>S.ach[a[0]]=1),fr:()=>S.fr++,stock:()=>S.stock+=500,ev:()=>{const e=EV[R()*EV.length|0];e[1]();toast(e[0],'ev');flash()},off:()=>S.b={on:true},lock:()=>S.b={}};
+function bt(k){BT[k]();if(k=='ach')confetti();if(k=='m1'||k=='m2')burst(innerWidth/2,80,16,['💵','🪙']);render()}
+function rBeta(){const b=S.b;$('bl').style.display=b.on?'none':'block';$('bo').style.display=b.on?'block':'none';if(!b.on)return;
+const tg=(k,l,d)=>`<label class="opt"><span><b>${l}</b><small>${d}</small></span><input type="checkbox" ${b[k]?'checked':''} onchange="bset('${k}',this.checked)"></label>`;
+const sl=(k,l,d,vs)=>`<label class="opt"><span><b>${l}</b><small>${d}</small></span><select onchange="bset('${k}',+this.value)">${vs.map(v=>`<option ${(b[k]||1)==v?'selected':''}>${v}</option>`).join('')}</select></label>`;
+$('bo').innerHTML=`<div class="panel"><h3>⚡ Toggles</h3>${tg('inf','♾️ Infinite money','Everything is free while on, and cash shows ∞.')}${tg('ar','📦 Auto-restock','Keeps the shelves full.')}${tg('mt','🧲 Max traffic','A customer is always at the register.')}${tg('ig','🌱 Instant crops','Every plot is ready immediately.')}${tg('af','🚜 Auto-farm','Harvests and replants corn for free.')}${sl('spd','⏩ Game speed','Speeds up every timer.',[1,2,5,10])}${sl('inc','💰 Income multiplier','Multiplies all earnings.',[1,10,100,1000])}</div>
+<div class="panel"><h3>🎁 Instant actions</h3><div class="g4">${[['m1','💵 +$1M cash'],['m2','🏦 +$1B cash'],['max','🔓 Max all upgrades'],['boost','⬆️ +10 levels on all'],['stock','📦 +500 stock'],['ev','🎲 Trigger random event'],['ach','🏆 Unlock all achievements'],['fr','🏛️ +1 Franchise point'],['off','↺ Reset toggles'],['lock','🔒 Lock beta lab']].map(([k,l])=>`<button onclick="bt('${k}')">${l}</button>`).join('')}</div></div>`}
+/* GAME LOOP */
+function loop(){try{tk++;if(cur)cur.age=(cur.age||0)+1;if(S.b.on){if(S.b.ar&&S.stock<30)S.stock+=50;if(S.b.af){harvestAll();S.plots.forEach((p,i)=>{if(!p)S.plots[i]={c:'corn',s:Date.now()}})}}
+if(hostConn){}else if(!cur&&S.stock>0&&(R()<(.3+.08*lv('lights'))*(Date.now()<S.traf?2:1)||(S.b.on&&S.b.mt)))spawn();
+else if(cur&&!lv('auto')&&--cur.pat<=0){log('slog','😠 A customer got tired of waiting and left','var(--r)');cur=null}
+if(!hostConn&&cur&&lv('auto')&&++autoT>=Math.max(1,4-(lv('auto')>>1))){autoT=0;scan()}
+if(lv('stand')&&++standT>=Math.max(2,10-lv('stand'))){standT=0;const k=['wheat','tomato','corn'].find(c=>S.inv[c]>0);if(k){S.inv[k]--;log('flog','🛖 Stand sold 1 '+k+' +'+fm(earn(CROPS[k].sell)),'var(--g)')}}
+if(++ecomT>=5){ecomT=0;S.prods.forEach(p=>{if(R()<p.conv/100*.35){const e=earn(p.p*.5);p.sales++;p.rev+=e;p.conv=Math.max(5,p.conv*.99);log('elog',`✔ Sold "${p.n}" +${fm(e)}`,'var(--g)')}})}
+if(tk%3==0)mtick();
+if(R()<1/80){const e=EV[R()*EV.length|0];e[1]();toast(e[0],'ev');flash();log('slog',e[0])}
+AC.forEach(a=>{if(!S.ach[a[0]]&&a[4]()){S.ach[a[0]]=1;toast('🏆 '+a[2]+': '+a[3],'ach');confetti()}});
+if(tk%5==0)save();if(isHost)sync();render()}finally{setTimeout(loop,1000/((S.b.on&&S.b.spd)||1))}}setTimeout(loop,1000);
+/* OFFLINE EARNINGS */
+(()=>{const s=Math.min((Date.now()-S.t)/1e3,28800);if(s<60)return;let g=0;const n=NICHES[S.niche];
+if(lv('auto')){const c=Math.min(s/10|0,S.stock>>1);S.stock-=c*2;g+=c*(n.lo+n.hi)*.5}
+g+=S.prods.reduce((t,p)=>t+p.p*.5*p.conv/100*.35*(s/5)*.5,0);
+if(g>0){const e=earn(g);setTimeout(()=>toast(`Welcome back! In ${s/60|0} min away you earned ${fm(e)}`,'ok'),500)}})();
+show('dash');
+</script></body></html>
